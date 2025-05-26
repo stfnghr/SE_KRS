@@ -10,10 +10,15 @@ import SwiftUI
 struct HistoryView: View {
     var body: some View {
         NavigationStack {
-            VStack {
-                ZStack {
+            ZStack {
+                Color(red: 255 / 255, green: 241 / 255, blue: 230 / 255)
+                    .ignoresSafeArea(.all)
+                
+                VStack {
                     Rectangle()
                         .fill(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 500)
                         .cornerRadius(20)
                         .shadow(radius: 3, x: 0, y: 3)
                         .overlay(
@@ -22,7 +27,7 @@ struct HistoryView: View {
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .padding(.top, 10)
-                                
+
                                 Text("25 Mei 2025")
                                     .font(.system(size: 14))
                                     .foregroundColor(.orange)
@@ -123,32 +128,26 @@ struct HistoryView: View {
                                         Text("5")
                                             .font(.caption)
                                     }.padding(.leading, 100)
-
                                 }
                             }
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 30)
-                        )
-                        .frame(maxWidth: .infinity)
-                }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 30)
+                        ).padding(30)
+                } .frame(maxHeight: .infinity, alignment: .top)
 
-                Button(action: {}) {
-                    Text("DOWNLOAD RECEIPT")
-                        .font(.system(size: 14))
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(height: 40)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.red)
-                        .cornerRadius(25)
-                        .padding(.top)
-                }
+                //                Button(action: {}) {
+                //                    Text("DOWNLOAD RECEIPT")
+                //                        .font(.system(size: 14))
+                //                        .fontWeight(.bold)
+                //                        .foregroundColor(.white)
+                //                        .padding()
+                //                        .frame(height: 40)
+                //                        .frame(maxWidth: .infinity)
+                //                        .background(Color.red)
+                //                        .cornerRadius(25)
+                //                        .padding(.top)
+                //                }
             }
-            .padding(30)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(
-                Color(red: 255 / 255, green: 241 / 255, blue: 230 / 255))
         }
         .navigationTitle("Your Receipt")
     }

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MenuView: View {
     @State var isSelected = false
-    @State private var selectedButtonIndex: Int? = nil
+    @State private var selectedButtonIndex: Int = 0
     let menuItems = ["Food", "Drink", "Others"]
 
     var body: some View {
