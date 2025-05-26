@@ -16,7 +16,7 @@ struct AnimatedNavbar: View {
                 Spacer()
                 ZStack {
                     NavbarBackgroundShape(circlePosition: circlePosition)
-                        .fill(Color.blue)
+                        .fill(Color.red)
                         .frame(height: 80)
                         .animation(.easeInOut(duration: 0.4), value: circlePosition)
                     HStack(spacing: 0) {
@@ -32,7 +32,7 @@ struct AnimatedNavbar: View {
                                             .offset(y: -15)
                                         Image(systemName: tab.rawValue)
                                             .font(.title2)
-                                            .foregroundColor(.blue)
+                                            .foregroundColor(.red)
                                             .offset(y: -15)
                                             .transition(.scale(scale: 0.5, anchor: .bottom).combined(with: .opacity))
                                     } else {
