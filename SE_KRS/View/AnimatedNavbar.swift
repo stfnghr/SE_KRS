@@ -16,14 +16,24 @@ struct AnimatedNavbar: View {
             ZStack {
                 switch selectedTab {
                 case .home:
-                    HomeView()
+                    HomeView(
+                        search: "", currentPage: 0,
+                        foodCardView: FoodCardView(
+                            menu: MenuModel(
+                                name: "", price: 0.0, description: "",
+                                category: "", image: ""),
+                            restaurant: RestaurantModel(
+                                name: "", address: "", rating: 0.0, image: "",
+                                menu: MenuModel(
+                                    name: "", price: 0.0, description: "",
+                                    category: "", image: ""))))
                 case .progress:
                     ActivityView()
                 case .person:
                     ProfileView()
                 }
             }
-            
+
             ZStack {
                 NavbarBackgroundShape(circlePosition: circlePosition)
                     .fill(Color.red)

@@ -9,6 +9,8 @@ import SwiftUI
 
 struct FoodCardView: View {
     @State var image = ""
+    var menu: MenuModel
+    var restaurant: RestaurantModel
     
     var body: some View {
         redCard() // or whiteCard()
@@ -31,12 +33,9 @@ struct FoodCardView: View {
                     .clipped()
                     .cornerRadius(15)
                 
-                Text("Restaurant Name")
-                    .font(.system(size: 10))
+                Text(menu.category)
+                    .font(.system(size: 16))
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
-                Text("Description")
-                    .font(.system(size: 8))
                     .foregroundColor(.white)
             }
         }
@@ -59,13 +58,10 @@ struct FoodCardView: View {
                     .clipped()
                     .cornerRadius(15)
                 
-                Text("Restaurant Name")
-                    .font(.subheadline)
+                Text(restaurant.name)
+                    .font(.system(size: 20))
                     .fontWeight(.bold)
-                    .foregroundColor(.black) // Changed to black for better visibility
-                Text("Description")
-                    .font(.caption)
-                    .foregroundColor(.gray) // Changed to gray for better visibility
+                    .foregroundColor(.black) 
             }
         }
     }
@@ -73,7 +69,46 @@ struct FoodCardView: View {
 
 #Preview {
     VStack {
-        FoodCardView().redCard()
-        FoodCardView().whiteCard()
+        FoodCardView(
+            menu: MenuModel(
+                name: "Bubur Ayam Original",
+                price: 12000,
+                description: "Bubur + ayam + cakwe + kulit pangsit + bawang goreng + kecap asin",
+                category: "Bubur",
+                image: "bubur-ayam-ori"),
+            restaurant: RestaurantModel(
+                name: "Koo-pi",
+                address: "Ruko Mutiara No.8",
+                rating: 4.9,
+                image: "koopi",
+                menu: MenuModel(
+                    name: "Kopi Gula Aren",
+                    price: 18000,
+                    description: "Kopi, susu, dan gula aren.",
+                    category: "Kopi",
+                    image: "kopi-gula-aren")
+            )
+        ).redCard()
+        
+        FoodCardView(
+            menu: MenuModel(
+                name: "Bubur Ayam Original",
+                price: 12000,
+                description: "Bubur + ayam + cakwe + kulit pangsit + bawang goreng + kecap asin",
+                category: "Bubur",
+                image: "bubur-ayam-ori"),
+            restaurant: RestaurantModel(
+                name: "Koo-pi",
+                address: "Ruko Mutiara No.8",
+                rating: 4.9,
+                image: "koopi",
+                menu: MenuModel(
+                    name: "Kopi Gula Aren",
+                    price: 18000,
+                    description: "Kopi, susu, dan gula aren.",
+                    category: "Kopi",
+                    image: "kopi-gula-aren")
+            )
+        ).whiteCard()
     }
 }

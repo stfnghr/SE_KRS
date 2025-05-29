@@ -11,27 +11,37 @@ struct HomeView: View {
     @State var search = ""
     @State var currentPage: Int? = 0
     let totalPages = 3
+    var foodCardView = FoodCardView(
+        menu: MenuModel(
+            name: "", price: 0.0, description: "", category: "", image: ""),
+        restaurant: RestaurantModel(
+            name: "", address: "", rating: 0.0, image: "",
+            menu: MenuModel(
+                name: "", price: 0.0, description: "", category: "", image: ""))
+    )
 
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.red.ignoresSafeArea(.all)
-                
+
                 Rectangle()
-                    .fill(Color(red: 255 / 255, green: 241 / 255, blue: 230 / 255))
+                    .fill(
+                        Color(red: 255 / 255, green: 241 / 255, blue: 230 / 255)
+                    )
                     .cornerRadius(30)
                     .padding(.top, 250)
                     .ignoresSafeArea(.all)
-                
+
                 VStack(spacing: 0) {
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
                             .padding(.leading, 15)
-                        
+
                         TextField("Lagi mau makan apa?", text: $search)
                             .font(.system(size: 14)).padding(.vertical, 12)
-                        
+
                         if !search.isEmpty {
                             Button(action: {
                                 search = ""
@@ -49,7 +59,7 @@ struct HomeView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 10)
                     .padding(.top, 160)
-                    
+
                     ScrollView {
                         VStack {
                             ZStack {
@@ -60,9 +70,10 @@ struct HomeView: View {
                                     .overlay(
                                         GeometryReader { geometry in
                                             let pageWidth = geometry.size.width
-                                            
+
                                             ScrollView(
-                                                .horizontal, showsIndicators: false
+                                                .horizontal,
+                                                showsIndicators: false
                                             ) {
                                                 HStack(spacing: 0) {
                                                     ForEach(0..<3, id: \.self) {
@@ -71,7 +82,8 @@ struct HomeView: View {
                                                             .resizable()
                                                             .scaledToFill()
                                                             .frame(
-                                                                width: pageWidth,
+                                                                width:
+                                                                    pageWidth,
                                                                 height: 150
                                                             )
                                                             .cornerRadius(30)
@@ -86,14 +98,14 @@ struct HomeView: View {
                                         }
                                     )
                                     .padding()
-                                
+
                                 HStack(spacing: 8) {
                                     ForEach(0..<3, id: \.self) { index in
                                         Circle()
                                             .fill(
                                                 currentPage == index
-                                                ? Color.orange
-                                                : Color.gray.opacity(0.4)
+                                                    ? Color.orange
+                                                    : Color.gray.opacity(0.4)
                                             )
                                             .frame(width: 8, height: 8)
                                     }
@@ -104,7 +116,7 @@ struct HomeView: View {
                                 .cornerRadius(20)
                                 .padding(.top, 120)
                             }
-                            
+
                             HStack {
                                 VStack(alignment: .leading) {
                                     Text("Resto Sekitarmu")
@@ -115,9 +127,9 @@ struct HomeView: View {
                                     .font(.caption)
                                     .foregroundColor(.orange)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Button(action: {}) {
                                     Text("Lihat Semua")
                                         .font(.caption)
@@ -130,27 +142,29 @@ struct HomeView: View {
                                 }
                             }
                             .padding(.horizontal)
-                            
+
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
-                                    ForEach(0..<4, id: \.self) { _ in
+                                    ForEach(0..<3, id: \.self) { _ in
                                         FoodCardView().whiteCard()
                                     }
                                 }
                                 .padding()
                             }
-                            
+
                             HStack {
                                 VStack(alignment: .leading) {
                                     Text("Pilih Makananmu")
                                         .font(.headline)
-                                    Text("Kita sediakan pilihan makanan untuk kamu")
-                                        .font(.caption)
-                                        .foregroundColor(.orange)
+                                    Text(
+                                        "Kita sediakan pilihan makanan untuk kamu"
+                                    )
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 Button(action: {}) {
                                     Text("Lihat Semua")
                                         .font(.caption)
@@ -164,7 +178,7 @@ struct HomeView: View {
                             }
                             .padding(.horizontal)
                             .padding(.top)
-                            
+
                             VStack {
                                 ForEach(0..<3, id: \.self) { _ in
                                     HStack {
@@ -179,10 +193,20 @@ struct HomeView: View {
                     }
                 }.padding(10)
             }
-        } .tint(.black)
+        }.tint(.black)
     }
 }
 
 #Preview {
-    HomeView()
+    HomeView(
+        search: "", currentPage: 0,
+        foodCardView: FoodCardView(
+            menu: MenuModel(
+                name: "", price: 0.0, description: "", category: "", image: ""),
+            restaurant: RestaurantModel(
+                name: "", address: "", rating: 0.0, image: "",
+                menu: MenuModel(
+                    name: "", price: 0.0, description: "", category: "", image: ""))
+        )
+    )
 }
