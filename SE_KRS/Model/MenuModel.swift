@@ -14,4 +14,8 @@ struct MenuModel: Codable, Hashable, Identifiable {
     var description: String
     var category: String
     var image: String
+    var stock: Int = 10 // Default stok 10
+    var isAvailable: Bool { // Computed property
+        return stock > 0
+    }
 }
