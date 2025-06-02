@@ -100,7 +100,7 @@ struct AnimatedNavbar: View {
         .ignoresSafeArea(.all, edges: .bottom)
         // MARK: - SARAN PERBAIKAN
         // Coba nonaktifkan baris di bawah ini untuk melihat apakah error constraint hilang
-        // .ignoresSafeArea(.keyboard, edges: .bottom)
+//         .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
 

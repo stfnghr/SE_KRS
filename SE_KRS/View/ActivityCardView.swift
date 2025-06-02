@@ -11,7 +11,6 @@ struct ActivityCardView: View {
     var body: some View {
         ZStack {
             Rectangle()
-//                .fill(Color.gray.opacity(0.3))
                 .fill(Color.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 110)
