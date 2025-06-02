@@ -1,10 +1,3 @@
-//
-//  MainView.swift
-//  SE_KRS
-//
-//  Created by Stefanie Agahari on 24/05/25.
-//
-
 import SwiftUI
 
 struct MainView: View {
@@ -15,4 +8,6 @@ struct MainView: View {
 
 #Preview {
     MainView()
+        .environmentObject(UserSession())
+        .environmentObject(CartViewModel(userSession: UserSession()))
 }

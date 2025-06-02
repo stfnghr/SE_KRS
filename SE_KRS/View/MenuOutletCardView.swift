@@ -1,13 +1,10 @@
-//
-//  MenuOutletCardView.swift
-//  SE_KRS
-//
-//  Created by Stefanie Agahari on 25/05/25.
-//
-
+// File: View/MenuOutletCardView.swift (DIREVISI)
 import SwiftUI
 
 struct MenuOutletCardView: View {
+    // <<< TAMBAHKAN PROPERTI INI >>>
+    var restaurant: RestaurantModel
+
     @State var isLiked = false
     
     var body: some View {
@@ -19,81 +16,48 @@ struct MenuOutletCardView: View {
                 .padding()
                 .shadow(radius: 5, x: 0, y: 5)
             
-            Circle()
+            Circle() // Lingkaran untuk gambar outlet/logo
                 .fill(Color.white)
                 .frame(width: 125, height: 125)
                 .padding(.bottom, 225)
+                .shadow(radius: 3)
             
-            Circle()
-                .fill(Color.orange.opacity(0.5))
+            // Gunakan gambar dari restaurant.image
+            Image(restaurant.image.isEmpty ? "nasi-goreng-44" : restaurant.image)
+                .resizable()
+                .scaledToFill()
                 .frame(width: 110, height: 110)
+                .clipShape(Circle())
                 .padding(.bottom, 225)
             
             VStack {
-                Text("Nasi Goreng 44")
+                // Gunakan data dari restaurant object
+                Text(restaurant.name)
                     .font(.title2)
                     .fontWeight(.semibold)
                 
-                Text("Jln.in Aja Dulu")
+                Text(restaurant.address)
                     .font(.subheadline)
                     .foregroundColor(.orange)
+                    .lineLimit(1)
                 
-                Text("Nasi, Cepat Saji")
-                    .font(.subheadline)
-                    .foregroundColor(.orange)
+                // Anda bisa menambahkan kategori dari menu utama restoran jika ada
+                // Text(restaurant.menu.category) // Contoh jika ada menu utama
+                //     .font(.subheadline)
+                //     .foregroundColor(.orange)
                 
-                HStack {
-                    HStack {
-                        Image(systemName: "star.fill")
-                            .font(.system(size: 25))
-                        
-                        VStack (alignment: .leading) {
-                            Text("Rating")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                            Text("4.9")
-                                .font(.system(size: 17))
-                                .fontWeight(.semibold)
-                        }
-                    }
-                    .frame(width: 140, height: 50)
-                    .background(.red)
-                    .cornerRadius(15)
-                    .foregroundColor(.white)
-                    
-                    
-                    
-                    HStack {
-                        Image(systemName: "clock.fill")
-                            .font(.system(size: 25))
-                        
-                        VStack (alignment: .leading) {
-                            Text("Delivery")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                            Text("20 Mins")
-                                .font(.system(size: 17))
-                                .fontWeight(.semibold)
-                        }
-                    }
-                    .frame(width: 140, height: 50)
-                    .background(.red)
-                    .cornerRadius(15)
-                    .foregroundColor(.white)
-                } .padding(.top, 10)
-            } .padding(.top, 50)
-            
-            Button(action: {
-                withAnimation(.spring()) {
-                    isLiked.toggle()
+                HStack(spacing: 15) {
+                    InfoCapsule(imageName: "star.fill", title: "Rating", value: String(format: "%.1f", restaurant.rating))
+                    InfoCapsule(imageName: "clock.fill", title: "Delivery", value: "20 Mins") // Waktu delivery bisa dinamis
                 }
+                .padding(.top, 10)
+            }
+            .padding(.top, 60)
+
+            Button(action: {
+                withAnimation(.spring()) { isLiked.toggle() }
             }) {
-                Image(
-                    systemName: isLiked
-                        ? "heart.fill" : "heart"
-                )
-                .foregroundColor(isLiked ? .red : .red)
-                .font(.system(size: 24))
+                Image(systemName: isLiked ? "heart.fill" : "heart").foregroundColor(.red).font(.system(size: 24))
             }
             .padding(.bottom, 175)
             .padding(.leading, 275)
@@ -101,6 +65,26 @@ struct MenuOutletCardView: View {
     }
 }
 
-#Preview {
-    MenuOutletCardView()
+// InfoCapsule tetap sama
+struct InfoCapsule: View {
+    let imageName: String
+    let title: String
+    let value: String
+
+    var body: some View {
+        HStack {
+            Image(systemName: imageName).font(.system(size: 20))
+            VStack (alignment: .leading) {
+                Text(title).font(.caption).fontWeight(.semibold)
+                Text(value).font(.system(size: 16, weight: .semibold))
+            }
+        }
+        .frame(minWidth: 120, idealWidth: 140, minHeight: 50)
+        .padding(.horizontal, 10)
+        .background(Color.red)
+        .cornerRadius(15)
+        .foregroundColor(.white)
+    }
 }
+
+

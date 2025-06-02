@@ -1,165 +1,166 @@
+// File: View/AnimatedNavbar.swift
 import SwiftUI
 
 struct AnimatedNavbar: View {
     @Namespace var animation
     @State private var selectedTab: Tab = .home
     @State private var circlePosition: CGFloat = 0
+    @EnvironmentObject var userSession: UserSession
+
     enum Tab: String, CaseIterable {
         case home = "house.fill"
+        case cart = "cart.fill"
         case progress = "list.clipboard.fill"
         case person = "person.fill"
     }
+
+    let navbarHeight: CGFloat = 70 // Tinggi dasar navbar
+    var safeAreaBottomInset: CGFloat {
+        (UIApplication.shared.connectedScenes.first as? UIWindowScene)?
+            .windows.first?.safeAreaInsets.bottom ?? 0
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color(.systemGray6).ignoresSafeArea()
-
+            
             ZStack {
                 switch selectedTab {
                 case .home:
-                    HomeView(
-                        search: "", currentPage: 0,
-                        foodCardView: FoodCardView(
-                            menu: MenuModel(
-                                name: "", price: 0.0, description: "",
-                                category: "", image: ""),
-                            restaurant: RestaurantModel(
-                                name: "", address: "", rating: 0.0, image: "",
-                                menu: MenuModel(
-                                    name: "", price: 0.0, description: "",
-                                    category: "", image: ""))))
+                    HomeView()
+                case .cart:
+                    CartView()
                 case .progress:
-                    ActivityView()
+                    ActivityView(userSession: userSession)
                 case .person:
-                    ProfileView()
+                    ProfileView(userSession: userSession)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.bottom, navbarHeight)
+
 
             ZStack {
-                NavbarBackgroundShape(circlePosition: circlePosition)
+                NavbarBackgroundShape(circlePosition: circlePosition, tabCount: CGFloat(Tab.allCases.count))
                     .fill(Color.red)
                     .shadow(radius: 3, x: 0, y: -5)
-                    .frame(height: 70)
-                    .animation(
-                        .easeInOut(duration: 0.4), value: circlePosition)
-
+                    .frame(height: navbarHeight + safeAreaBottomInset)
+                
                 HStack(spacing: 0) {
                     ForEach(Tab.allCases, id: \.self) { tab in
                         Spacer()
-                        VStack {
+                        VStack(spacing: 4) {
                             ZStack {
                                 if selectedTab == tab {
                                     Circle()
-                                        .fill(.white)
-                                        .matchedGeometryEffect(
-                                            id: "circle", in: animation
-                                        )
-                                        .frame(width: 65, height: 65)
-                                        .offset(y: -15)
+                                        .fill(Color.white)
+                                        .matchedGeometryEffect(id: "selected_tab_circle_navbar_v5", in: animation)
+                                        .frame(width: 56, height: 56)
+                                        .offset(y: -navbarHeight / 2.5)
 
                                     Image(systemName: tab.rawValue)
-                                        .font(.title2)
+                                        .font(.system(size: 22))
                                         .foregroundColor(.red)
-                                        .offset(y: -15)
-                                        .transition(
-                                            .scale(
-                                                scale: 0.5, anchor: .bottom
-                                            ).combined(with: .opacity))
+                                        .offset(y: -navbarHeight / 2.5)
+                                        .transition(.scale(scale: 0.5, anchor: .center).combined(with: .opacity))
                                 } else {
                                     Image(systemName: tab.rawValue)
-                                        .font(.title2)
-                                        .foregroundColor(.white)
+                                        .font(.system(size: 22))
+                                        .foregroundColor(.white.opacity(0.8))
                                         .transition(.opacity)
                                 }
                             }
+                            .frame(height: 56)
                         }
-                        .frame(width: 70, height: 80)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: navbarHeight)
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            withAnimation(.easeInOut(duration: 0.4)) {
+                            withAnimation(.interpolatingSpring(mass: 0.8, stiffness: 150, damping: 15)) {
                                 selectedTab = tab
-                                circlePosition = CGFloat(tab.index)
+                                if let tabIndex = Tab.allCases.firstIndex(of: tab) {
+                                   circlePosition = CGFloat(tabIndex)
+                                }
                             }
                         }
                         Spacer()
                     }
                 }
-                .padding(.bottom, 10)
+                .padding(.bottom, safeAreaBottomInset)
+                .frame(height: navbarHeight + safeAreaBottomInset)
             }
-            .frame(maxWidth: .infinity, alignment: .bottom)
+            .frame(maxWidth: .infinity)
+            .frame(height: navbarHeight + safeAreaBottomInset)
+            .animation(.easeInOut(duration: 0.3), value: circlePosition)
             .onAppear {
-                circlePosition = CGFloat(selectedTab.index)
+                if let initialTabIndex = Tab.allCases.firstIndex(of: selectedTab) {
+                    circlePosition = CGFloat(initialTabIndex)
+                }
             }
-        }.ignoresSafeArea(.all, edges: .bottom)
+        }
+        .ignoresSafeArea(.all, edges: .bottom)
+        // MARK: - SARAN PERBAIKAN
+        // Coba nonaktifkan baris di bawah ini untuk melihat apakah error constraint hilang
+        // .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
+
 extension AnimatedNavbar.Tab {
     var index: Int {
-        switch self {
-        case .home: return 0
-        case .progress: return 1
-        case .person: return 2
+        guard let index = Self.allCases.firstIndex(of: self) else {
+            fatalError("Tab tidak ditemukan dalam allCases.")
         }
+        return index
     }
 }
+
 struct NavbarBackgroundShape: Shape {
     var circlePosition: CGFloat
+    var tabCount: CGFloat
+    let navbarBaseHeight: CGFloat = 70
+
     var animatableData: CGFloat {
         get { circlePosition }
         set { circlePosition = newValue }
     }
+
     func path(in rect: CGRect) -> Path {
         var path = Path()
-        let cutoutRadius: CGFloat = 80
-        let cutoutDepth: CGFloat = 60
-        let cornerRadius: CGFloat = 2
-        let tabWidth = rect.width / CGFloat(AnimatedNavbar.Tab.allCases.count)
+        
+        let actualNavbarTopY = rect.maxY - navbarBaseHeight
+        
+        let cutoutRadius: CGFloat = 32
+        let cutoutDepthUpwards: CGFloat = 28
+
+        guard tabCount > 0 else { return path }
+        let tabWidth = rect.width / tabCount
         let circleCenterX = tabWidth * circlePosition + tabWidth / 2
-        let cutoutStart = circleCenterX - cutoutRadius
-        let cutoutEnd = circleCenterX + cutoutRadius
-        path.move(to: CGPoint(x: rect.minX, y: rect.maxY - cornerRadius))
-        path.addArc(
-            center: CGPoint(
-                x: rect.minX + cornerRadius, y: rect.maxY - cornerRadius),
-            radius: cornerRadius,
-            startAngle: .degrees(90), endAngle: .degrees(180), clockwise: true)
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + cornerRadius))
-        path.addArc(
-            center: CGPoint(
-                x: rect.minX + cornerRadius, y: rect.minY + cornerRadius),
-            radius: cornerRadius,
-            startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false
+        
+        path.move(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: actualNavbarTopY))
+        
+        path.addLine(to: CGPoint(x: circleCenterX - cutoutRadius, y: actualNavbarTopY))
+
+        path.addQuadCurve(
+            to: CGPoint(x: circleCenterX, y: actualNavbarTopY - cutoutDepthUpwards),
+            control: CGPoint(x: circleCenterX - cutoutRadius * 0.75, y: actualNavbarTopY - cutoutDepthUpwards * 0.1)
         )
-        path.addLine(to: CGPoint(x: cutoutStart, y: rect.minY))
-        let controlPoint1 = CGPoint(
-            x: cutoutStart + cutoutRadius * 0.6, y: rect.minY)
-        let midPoint = CGPoint(x: circleCenterX, y: rect.minY + cutoutDepth)
-        let controlPoint2 = CGPoint(
-            x: circleCenterX - cutoutRadius * 0.6, y: rect.minY + cutoutDepth)
-        path.addCurve(
-            to: midPoint, control1: controlPoint1, control2: controlPoint2)
-        let controlPoint3 = CGPoint(
-            x: circleCenterX + cutoutRadius * 0.6, y: rect.minY + cutoutDepth)
-        let controlPoint4 = CGPoint(
-            x: cutoutEnd - cutoutRadius * 0.6, y: rect.minY)
-        path.addCurve(
-            to: CGPoint(x: cutoutEnd, y: rect.minY), control1: controlPoint3,
-            control2: controlPoint4)
-        path.addLine(to: CGPoint(x: rect.maxX - cornerRadius, y: rect.minY))
-        path.addArc(
-            center: CGPoint(
-                x: rect.maxX - cornerRadius, y: rect.minY + cornerRadius),
-            radius: cornerRadius,
-            startAngle: .degrees(270), endAngle: .degrees(0), clockwise: false)
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - cornerRadius))
-        path.addArc(
-            center: CGPoint(
-                x: rect.maxX - cornerRadius, y: rect.maxY - cornerRadius),
-            radius: cornerRadius,
-            startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
+        path.addQuadCurve(
+            to: CGPoint(x: circleCenterX + cutoutRadius, y: actualNavbarTopY),
+            control: CGPoint(x: circleCenterX + cutoutRadius * 0.75, y: actualNavbarTopY - cutoutDepthUpwards * 0.1)
+        )
+
+        path.addLine(to: CGPoint(x: rect.maxX, y: actualNavbarTopY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
         path.closeSubpath()
         return path
     }
 }
-#Preview {
-    AnimatedNavbar()
+
+#Preview("AnimatedNavbar_LayoutFix_Final") {
+    let previewUserSession = UserSession()
+    let previewCartViewModel = CartViewModel(userSession: previewUserSession)
+
+    return AnimatedNavbar()
+        .environmentObject(previewUserSession)
+        .environmentObject(previewCartViewModel)
 }

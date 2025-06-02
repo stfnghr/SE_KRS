@@ -13,5 +13,8 @@ struct RestaurantModel: Codable, Hashable, Identifiable {
     var address: String
     var rating: Double
     var image: String
-    var menu: MenuModel
+    // var menu: MenuModel // Ganti ini
+    var menuItems: [MenuModel] = [] // Menjadi array MenuModel
+    var isOpen: Bool = true // Defaultnya restoran buka
+    var operationalHours: String = "09:00 - 22:00" // Contoh jam operasional
 }

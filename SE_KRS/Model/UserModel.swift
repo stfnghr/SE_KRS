@@ -13,4 +13,5 @@ struct UserModel: Codable, Hashable, Identifiable {
     var phone: String
     var email: String
     var password: String
+    var balance: Double = 0.0
 }
