@@ -58,7 +58,7 @@ class ProfileViewModel: ObservableObject {
         self.userBalance = newBalance // Update published property
 
         let transactionId = dataStore.generateTransactionId()
-        let transaction = Transaction(
+        let transaction = TransactionModels(
             id: transactionId,
             userId: userId,
             type: .topUp,

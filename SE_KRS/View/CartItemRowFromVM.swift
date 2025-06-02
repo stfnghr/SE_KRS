@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CartItemRowFromVM: View {
-    @Binding var item: OrderItem // Menggunakan @Binding untuk quantity
+    @Binding var item: OrderModels // Menggunakan @Binding untuk quantity
     @ObservedObject var cartViewModel: CartViewModel // Untuk memanggil fungsi update
 
     var body: some View {

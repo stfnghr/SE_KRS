@@ -10,7 +10,7 @@ enum TransactionStatus: String, Codable, Hashable {
     case failed = "Failed"
 }
 
-struct Transaction: Identifiable, Codable, Hashable {
+struct TransactionModels: Identifiable, Codable, Hashable {
     let id: String
     let userId: String
     var type: TransactionType

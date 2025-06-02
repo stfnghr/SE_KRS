@@ -8,7 +8,7 @@ class DummyDataStore {
     // Data yang sebelumnya ada di KRSStoreService, sekarang di sini.
     var userBalances: [String: Double] = [:] // [UserID: Balance]
     var orders: [Order] = [] // Pastikan struct Order sudah didefinisikan
-    var transactions: [Transaction] = [] // Pastikan struct Transaction sudah didefinisikan
+    var transactions: [TransactionModels] = [] // Pastikan struct Transaction sudah didefinisikan
 
     // Counter untuk ID unik (untuk dummy)
     var orderIdCounter: Int = 1
