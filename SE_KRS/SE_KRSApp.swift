@@ -1,27 +1,29 @@
+// File: SE_KRSApp.swift
 import SwiftUI
 
 @main
 struct SE_KRSApp: App {
     @StateObject var userSession: UserSession
-    @StateObject var cartViewModel: CartViewModel // Dibuat di sini
+    @StateObject var cartViewModel: CartViewModel
 
     init() {
-        let session = UserSession() // Satu instance UserSession
+        let session = UserSession()
         _userSession = StateObject(wrappedValue: session)
-        // CartViewModel menggunakan instance UserSession yang sama
         _cartViewModel = StateObject(wrappedValue: CartViewModel(userSession: session))
     }
 
     var body: some Scene {
         WindowGroup {
+            // Logika baru: Jika login, tampilkan MainView. Jika tidak, tampilkan LandingView.
             if userSession.isLoggedIn {
                 MainView()
                     .environmentObject(userSession)
-                    .environmentObject(cartViewModel) // <<< INJECT CartViewModel INI
+                    .environmentObject(cartViewModel)
             } else {
-                LoginSignupView()
+                LandingView() // << REVISI DI SINI
                     .environmentObject(userSession)
-                    .environmentObject(cartViewModel) // Inject juga jika diperlukan
+                    // CartViewModel bisa tetap di-inject jika diperlukan di alur login/signup
+                    .environmentObject(cartViewModel)
             }
         }
     }
