@@ -6,8 +6,7 @@ struct LandingView: View {
         NavigationView {
             ZStack {
                 // Background color yang senada dengan tema aplikasi
-                Color("Beige") // Anda bisa membuat custom color set bernama "Beige"
-                    .ignoresSafeArea()
+                Color(red: 255/255, green: 241/255, blue: 230/255).edgesIgnoringSafeArea(.all)
 
                 VStack(spacing: 20) {
                     Spacer()
@@ -21,7 +20,7 @@ struct LandingView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(Color("DarkBrown")) // Buat custom color "DarkBrown"
+                        .foregroundColor(.orange) // Buat custom color "DarkBrown"
 
                     Text("Pesan makanan favoritmu dengan mudah dan cepat, kapan pun, di mana pun.")
                         .font(.headline)
@@ -62,10 +61,6 @@ struct LandingView: View {
         .accentColor(.red) // Mengubah warna back button di halaman selanjutnya menjadi merah
     }
 }
-
-// Tambahkan custom color di Assets.xcassets Anda
-// 1. "Beige": Red: 255, Green: 241, Blue: 230
-// 2. "DarkBrown": Pilih warna coklat tua yang sesuai
 
 #Preview {
     LandingView()
