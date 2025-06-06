@@ -83,42 +83,24 @@ struct ProfileView: View { //
 
     @ViewBuilder
     func topUpSectionFromViewModel() -> some View {
+        // ... (Konten sama seperti sebelumnya, memanggil viewModel.topUpBalance)
         VStack(alignment: .leading, spacing: 10) {
             Text("Top Up Balance").font(.headline)
             HStack {
-                TextField("Enter amount", text: $topUpAmountString)
-                    .keyboardType(.numberPad)
-                    .padding(8)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(5)
-                
-                // --- REVISI LOGIKA TOMBOL ---
+                TextField("Enter amount", text: $topUpAmountString).keyboardType(.numberPad).padding(8).background(Color.gray.opacity(0.1)).cornerRadius(5)
                 Button(action: {
-                    // Menggunakan if-let untuk menghindari 'return'
-                    if let amount = Double(topUpAmountString), amount > 0 {
-                        viewModel.topUpBalance(amount: amount)
-                        topUpAmountString = ""
-                    } else {
+                    guard let amount = Double(topUpAmountString), amount > 0 else {
                         viewModel.alertMessage = "Please enter a valid positive amount."
                         viewModel.showAlert = true
+                        return
                     }
+                    viewModel.topUpBalance(amount: amount)
+                    topUpAmountString = ""
                 }) {
-                    Text("Top Up")
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 15)
-                        .padding(.vertical, 8)
-                        .background(Color.green)
-                        .cornerRadius(25)
+                    Text("Top Up").fontWeight(.semibold).foregroundColor(.white).padding(.horizontal, 15).padding(.vertical, 8).background(Color.green).cornerRadius(25)
                 }
-                // ---------------------------
             }
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(10)
-        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
-        .padding(.horizontal)
+        }.padding().background(Color.white).cornerRadius(10).shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2).padding(.horizontal)
     }
     
     @ViewBuilder
@@ -128,4 +110,16 @@ struct ProfileView: View { //
             Text("LOG OUT").fontWeight(.bold).foregroundColor(.white).frame(maxWidth: .infinity).padding().background(Color.red.opacity(0.8)).cornerRadius(25) //
         }.padding(.horizontal).padding(.bottom, 20)
     }
+}
+
+// Preview untuk ProfileView
+#Preview("ProfileView With ViewModel") {
+    let previewUserSession = UserSession()
+    let dummyUser = UserModel(name: "Profile Preview", phone: "08123", email: "profile@preview.com", password: "123", balance: 50000)
+    // Pastikan data saldo ada di DummyDataStore untuk preview
+    DummyDataStore.shared.userBalances[dummyUser.id.uuidString] = dummyUser.balance
+    previewUserSession.loginUser(user: dummyUser)
+
+    return ProfileView(userSession: previewUserSession)
+        .environmentObject(previewUserSession) // Jika sub-komponen masih membutuhkannya via env
 }

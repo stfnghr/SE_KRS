@@ -101,7 +101,7 @@ struct LoginSignupView: View { //
         // Dummy sign up: Buat UserModel baru dan loginkan
         let newUser = UserModel(name: name, phone: phoneNumber, email: email, password: password, balance: 150000) // Saldo awal dummy
         
-        userSession.loginUser(user: newUser, message: "Pendaftaran Berhasil!")
+        userSession.loginUser(user: newUser) // Panggil fungsi login di UserSession
         
         // Tidak perlu alert di sini jika navigasi otomatis terjadi karena perubahan userSession.isLoggedIn
         // Namun, jika ingin memberi pesan selamat datang:
@@ -132,6 +132,7 @@ struct LoginSignupView: View { //
                                      password: password, // Seharusnya password di-hash dan diverifikasi
                                      balance: 150000) // Saldo dummy untuk login
         
+        userSession.loginUser(user: loggedInUser)
         
         // Tidak perlu alert di sini jika navigasi otomatis terjadi
         // alertTitle = "Login Berhasil"

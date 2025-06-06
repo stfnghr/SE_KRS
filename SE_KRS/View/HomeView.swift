@@ -121,9 +121,8 @@ struct ImageCarouselView: View { //
     }
 }
 
-
-// Ganti struct RestoSekitarmuSection
-struct RestoSekitarmuSection: View {
+// MARK: - Subview untuk Section "Resto Sekitarmu" (Pastikan ini ada)
+struct RestoSekitarmuSection: View { //
     var restaurants: [RestaurantModel]
 
     var body: some View {
@@ -131,17 +130,19 @@ struct RestoSekitarmuSection: View {
             HStack {
                 VStack(alignment: .leading) { Text("Resto Sekitarmu").font(.headline); Text("Kami pilihin tempat yang lagi buka dan enak.").font(.caption).foregroundColor(.orange) }
                 Spacer()
-                NavigationLink(destination: AllRestaurantsView(restaurants: restaurants)) {
-                    Text("Lihat Semua").font(.caption).fontWeight(.bold).foregroundColor(.white).padding(.vertical, 8).padding(.horizontal, 15).background(Color.red).cornerRadius(25)
-                }
+                Button(action: {}) { Text("Lihat Semua").font(.caption).fontWeight(.bold).foregroundColor(.white).frame(width: 80, height: 5).padding().background(Color.red).cornerRadius(25) }
             }.padding(.horizontal)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 15) {
                     ForEach(restaurants) { restaurant in
-                        // --- REVISI PEMANGGILAN ---
-                        // Kita panggil init yang benar dan hapus .whiteCard
-                        FoodCardView(restaurant: restaurant)
+                        // Di sini, restaurant.menu adalah MenuModel tunggal berdasarkan definisi Anda.
+                        // FoodCardView mengharapkan 'menu: MenuModel'.
+                        // Jika Anda ingin FoodCardView.whiteCard hanya menampilkan info resto,
+                        // Anda bisa membuat init FoodCardView yang hanya butuh RestaurantModel untuk kasus itu,
+                        // atau tetap teruskan menu utama restoran.
+                        FoodCardView(menu: restaurant.menuItems.first ?? MenuModel(name: "Info", price: 0, description: "", category: "", image: "foods"), restaurant: restaurant) // Ambil menu pertama sebagai contoh
+                            .whiteCard(restaurant: restaurant) // Panggil whiteCard secara eksplisit
                     }
                 }.padding(.horizontal)
             }
@@ -149,37 +150,29 @@ struct RestoSekitarmuSection: View {
     }
 }
 
-
-struct PilihMakananmuSection: View {
+// MARK: - Subview untuk Section "Pilih Makananmu" (Pastikan ini ada)
+struct PilihMakananmuSection: View { //
     var popularMenus: [MenuModel]
-    var dummyRestaurant: RestaurantModel
-    
-    // REVISI: Mengatur grid dengan kolom yang ukurannya fleksibel
-    private let columns: [GridItem] = [
-        GridItem(.flexible(), spacing: 15),
-        GridItem(.flexible(), spacing: 15)
-    ]
+    var dummyRestaurant: RestaurantModel // Ini digunakan untuk FoodCardView yang butuh parameter restaurant
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                VStack(alignment: .leading) { Text("Pilih Makananmu").font(.headline); Text("Kita sediakan pilihan makanan untuk kamu.").font(.caption).foregroundColor(.orange) }
+                VStack(alignment: .leading) { Text("Pilih Makananmu").font(.headline); Text("Kita sediakan pilihan makanan untuk kamu").font(.caption).foregroundColor(.orange) }
                 Spacer()
-                NavigationLink(destination: AllFoodsView(popularMenus: popularMenus, dummyRestaurant: dummyRestaurant)) {
-                     Text("Lihat Semua").font(.caption).fontWeight(.bold).foregroundColor(.white).padding(.vertical, 8).padding(.horizontal, 15).background(Color.red).cornerRadius(25)
-                }
+                Button(action: {}) { Text("Lihat Semua").font(.caption).fontWeight(.bold).foregroundColor(.white).frame(width: 80, height: 5).padding().background(Color.red).cornerRadius(25) }
             }.padding(.horizontal).padding(.top)
             
-            // REVISI: Kembali menggunakan LazyVGrid untuk layout yang lebih baik
-            LazyVGrid(columns: columns, spacing: 20) {
-                ForEach(popularMenus.prefix(4)) { menu_item in // Hanya tampilkan 4 item di home
-                    FoodCardView(menuItem: menu_item, restaurant: dummyRestaurant)
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                ForEach(popularMenus) { menu_item in
+                    FoodCardView(menu: menu_item, restaurant: dummyRestaurant).redCard(menuItem: menu_item) // Panggil redCard secara eksplisit
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 5)
         }
     }
 }
+
 
 #Preview { //
     HomeView()
