@@ -18,7 +18,7 @@ enum PaymentType: String, Codable, Hashable, CaseIterable, Identifiable {
     var id: String { self.rawValue }
 }
 
-struct OrderItem: Identifiable, Codable, Hashable {
+struct OrderModels: Identifiable, Codable, Hashable {
     var itemId: String
     var itemName: String
     var quantity: Int
@@ -33,7 +33,7 @@ struct OrderItem: Identifiable, Codable, Hashable {
 struct Order: Identifiable, Codable, Hashable {
     let id: String
     let userId: String
-    var items: [OrderItem]
+    var items: [OrderModels]
     var totalAmount: Double
     var subTotalItems: Double
     var shippingFee: Double = 10000

@@ -2,9 +2,9 @@ import Foundation
 import Combine
 
 class CartViewModel: ObservableObject {
-    @Published var activeCart: [OrderItem] = []
+    @Published var activeCart: [OrderModels] = []
     @Published var currentCartSubtotalItems: Double = 0.0
-    @Published var shippingFee: Double = 10000
+    @Published var shippingFee: Double = 5000
     @Published var discount: Double = 0
     
     var currentCartTotalPayable: Double {
@@ -37,13 +37,13 @@ class CartViewModel: ObservableObject {
         if let index = activeCart.firstIndex(where: { $0.itemId == menuItem.id.uuidString }) {
             activeCart[index].quantity += quantity
         } else {
-            let orderItem = OrderItem(
+            let orderModel = OrderModels(
                 itemId: menuItem.id.uuidString,
                 itemName: menuItem.name,
                 quantity: quantity,
                 pricePerItem: menuItem.price
             )
-            activeCart.append(orderItem)
+            activeCart.append(orderModel)
         }
         calculateCartSubtotal()
     }
@@ -163,7 +163,7 @@ class CartViewModel: ObservableObject {
                  self.dataStore.orders.append(order)
             }
 
-            let paymentTransaction = Transaction(
+            let paymentTransaction = TransactionModels(
                 id: self.dataStore.generateTransactionId(),
                 userId: userId,
                 type: .orderPayment,

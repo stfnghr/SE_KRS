@@ -61,7 +61,7 @@ struct ActivityCardViewWrapper: View { //
 
 #Preview("ActivityCardViewWrapperPreview") { //
     // <<< PERBAIKAN DI SINI >>>
-    let orderItemPreview = OrderItem(
+    let orderItemPreview = OrderModels(
         itemId: "PREV001",
         itemName: "Nasi Goreng Mantap",
         quantity: 1,

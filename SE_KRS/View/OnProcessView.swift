@@ -5,16 +5,22 @@
 //  Created by Stefanie Agahari on 26/05/25.
 //
 
+import MapKit
 import SwiftUI
 
 struct OnProcessView: View {
+    let location = CLLocationCoordinate2D(
+        latitude: -7.2865722,
+        longitude: 112.6320953
+    )
+
     var body: some View {
         NavigationStack {
             ZStack {
-                // Maps
-                Rectangle()
-                    .fill(Color.gray.opacity(0.4))
-                    .ignoresSafeArea(.all)
+                Map {
+                    Marker("", coordinate: location)
+                }
+                .mapControlVisibility(.hidden)
 
                 Rectangle()
                     .fill(Color.white)
@@ -59,37 +65,37 @@ struct OnProcessView: View {
                                 Text("Pick Up Order at:")
                                     .font(.system(size: 14))
                                     .foregroundColor(.orange)
-                                
+
                                 Text("Bubur Ayam Surabaya")
                                     .font(.system(size: 18))
                             }
                             .padding(.top, 20)
                             Spacer()
                         }
-                        
+
                         HStack {
                             VStack(alignment: .leading) {
                                 Text("Delivered to:")
                                     .font(.system(size: 14))
                                     .foregroundColor(.orange)
-                                
+
                                 Text("Waterfront Citraland")
                                     .font(.system(size: 18))
                             }
                             .padding(.top, 20)
                             Spacer()
                         }
-                        
+
                         Divider()
                             .background(.black)
                             .padding(.vertical)
-                        
+
                         HStack {
                             VStack(alignment: .leading) {
                                 Text("Order Details")
                                     .font(.system(size: 14))
                                     .foregroundColor(.orange)
-                                
+
                                 HStack {
                                     Text("Bubur Ayam Original")
                                         .font(.system(size: 18))
@@ -101,8 +107,8 @@ struct OnProcessView: View {
                             .padding(.top, 10)
                             Spacer()
                         }
-                    } .padding(30)
-                } .padding(.top, 390)
+                    }.padding(30)
+                }.padding(.top, 390)
             }
         }.tint(.black)
     }

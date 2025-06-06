@@ -99,9 +99,9 @@ struct LoginSignupView: View { //
         }
 
         // Dummy sign up: Buat UserModel baru dan loginkan
-        let newUser = UserModel(name: name, phone: phoneNumber, email: email, password: password, balance: 50000) // Saldo awal dummy
+        let newUser = UserModel(name: name, phone: phoneNumber, email: email, password: password, balance: 150000) // Saldo awal dummy
         
-        userSession.loginUser(user: newUser) // Panggil fungsi login di UserSession
+        userSession.loginUser(user: newUser, message: "Pendaftaran Berhasil!")
         
         // Tidak perlu alert di sini jika navigasi otomatis terjadi karena perubahan userSession.isLoggedIn
         // Namun, jika ingin memberi pesan selamat datang:
@@ -112,12 +112,12 @@ struct LoginSignupView: View { //
     }
     
     func handleLogin() { // Fungsi ini sekarang adalah method dari struct
-        guard !email.isEmpty, !password.isEmpty else {
-            alertTitle = "Login Gagal"
-            alertMessage = "Email dan password wajib diisi."
-            showingAlert = true
-            return // Baris 145: return di sini valid karena ini method struct, bukan di dalam body ViewBuilder
-        }
+//        guard !email.isEmpty, !password.isEmpty else {
+//            alertTitle = "Login Gagal"
+//            alertMessage = "Email dan password wajib diisi."
+//            showingAlert = true
+//            return // Baris 145: return di sini valid karena ini method struct, bukan di dalam body ViewBuilder
+//        }
 
         // Dummy login
         // Di aplikasi nyata, Anda akan memvalidasi ke backend atau data yang tersimpan.
@@ -132,7 +132,6 @@ struct LoginSignupView: View { //
                                      password: password, // Seharusnya password di-hash dan diverifikasi
                                      balance: 150000) // Saldo dummy untuk login
         
-        userSession.loginUser(user: loggedInUser)
         
         // Tidak perlu alert di sini jika navigasi otomatis terjadi
         // alertTitle = "Login Berhasil"
@@ -146,13 +145,13 @@ struct LoginSignupView: View { //
 struct FormTextFieldStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .padding() //
-            .frame(maxWidth: .infinity, alignment: .leading) //
-            .frame(height: 50) //
-            .foregroundColor(.orange) //
-            .background(Color.white) //
-            .cornerRadius(30) //
-            .shadow(color: .gray.opacity(0.3), radius: 3, x: 2, y: 2) // Tambahkan sedikit shadow
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: 50)
+            .foregroundColor(.black) // Changed for testing
+            .background(Color.white) // Changed for testing
+            .cornerRadius(30)
+            .shadow(color: .gray.opacity(0.3), radius: 3, x: 2, y: 2)
     }
 }
 
