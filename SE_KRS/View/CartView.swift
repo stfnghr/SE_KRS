@@ -2,52 +2,80 @@
 import SwiftUI
 
 struct CartView: View {
-    @EnvironmentObject var userSession: UserSession // Masih bisa berguna untuk info user
-    // <<< GUNAKAN @EnvironmentObject untuk viewModel, BUKAN @StateObject >>>
+    @EnvironmentObject var userSession: UserSession
     @EnvironmentObject var viewModel: CartViewModel
     
-    // State untuk pilihan metode pembayaran tetap di sini
     @State private var selectedPaymentMethod: PaymentType = .balance
 
-    // <<< HAPUS init(userSession: UserSession) >>>
-    // init(userSession: UserSession) {
-    //     // _viewModel = StateObject(wrappedValue: CartViewModel(userSession: userSession)) // JANGAN BUAT INSTANCE BARU DI SINI
-    // }
-    
     var body: some View {
         NavigationStack {
-            ZStack { // Tambahkan ZStack untuk overlay loading
-                VStack {
-                    cartHeader() // Menggunakan viewModel dari environment
-                    Divider().background(.black).padding(.horizontal)
+            ZStack { // ZStack for background and loading overlay
+                Color("Beige").ignoresSafeArea(.all) // Background consistent with Landing/Login
+                
+                VStack(spacing: 0) { // Use VStack utama with spacing 0
+                    cartHeader() // Header
+                        .padding(.horizontal) // Padding agar tidak mepet tepi
+                        .padding(.top, 10)
+
+                    Divider().background(.gray.opacity(0.3)).padding(.horizontal) // Garis pemisah yang lebih soft
 
                     // Logika if/else menggunakan viewModel dari environment
                     if viewModel.activeCart.isEmpty && !viewModel.paymentProcessing {
                         emptyCartView()
                     } else {
-                        cartContentList() // Menggunakan viewModel dari environment
-                        if !viewModel.activeCart.isEmpty {
-                            paymentMethodPicker() // Menggunakan viewModel dari environment
+                        ScrollView { // Use ScrollView for list item
+                            VStack(spacing: 12) { // Spacing antar item
+                                ForEach($viewModel.activeCart) { $itemInCart in
+                                    CartItemRowFromVM(item: $itemInCart, cartViewModel: viewModel)
+                                        .background(Color.white) // Beri background putih pada row
+                                        .cornerRadius(15) // Corner radius untuk setiap item row
+                                        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2) // Shadow lembut
+                                        .padding(.horizontal, 5) // Padding horizontal untuk setiap row
+                                }
+                                .onDelete(perform: deleteItemsFromVM) // Tetap bisa dihapus
+                            }
+                            .padding(.top, 15) // Padding di atas daftar item
+
+                            // Ringkasan Pesanan dalam card terpisah
+                            orderSummarySection()
+                                .padding(.horizontal) // Padding di sini untuk card ringkasan
+                                .padding(.top, 20)
+                            
+                            // Metode Pembayaran
+                            paymentMethodPicker()
+                                .padding(.horizontal)
+                                .padding(.top, 20)
+
+                            Spacer(minLength: 20) // Spacer di akhir ScrollView
                         }
-                        placeOrderButton() // Menggunakan viewModel dari environment
+                        .padding(.bottom, 100) // Beri ruang untuk tombol di bawah
                     }
-                    Spacer()
+                    Spacer() // Mendorong konten ke atas
                 }
-                .padding(.horizontal)
                 .navigationTitle("Keranjang")
                 .navigationBarTitleDisplayMode(.inline)
-                .alert(isPresented: $viewModel.showAlert) { // Menggunakan viewModel dari environment
+                .alert(isPresented: $viewModel.showAlert) {
                     Alert(title: Text(viewModel.alertTitle),
                           message: Text(viewModel.alertMessage),
                           dismissButton: .default(Text("OK")) {
                         if viewModel.orderProcessedSuccessfully {
+                            // Reset after order successful and alert closed
                             viewModel.orderProcessedSuccessfully = false
                             viewModel.processedOrderId = nil
                         }
                     })
                 }
                 
-                if viewModel.paymentProcessing { // Menggunakan viewModel dari environment
+                // Tombol "Bayar & Pesan Sekarang" di bagian bawah, di luar ScrollView
+                VStack {
+                    Spacer()
+                    placeOrderButton()
+                        .padding(.horizontal)
+                        .padding(.bottom, 20) // Padding from bottom of screen
+                }
+                
+                // Loading overlay
+                if viewModel.paymentProcessing {
                     Color.black.opacity(0.4).edgesIgnoringSafeArea(.all)
                     ProgressView("Memproses Pesanan...")
                         .padding()
@@ -57,109 +85,128 @@ struct CartView: View {
                 }
             } // End ZStack
         }
-        .tint(.orange)
-        // .onAppear {
-        //    // Jika perlu melakukan sesuatu saat CartView muncul dengan viewModel dari environment
-        //    // print("CartView appeared. Cart items: \(viewModel.activeCart.count)")
-        // }
+        .tint(.red) // Tint color for NavigationLink/Button
     }
 
     @ViewBuilder
-    func cartHeader() -> some View { //
-        let restaurantNameDisplay = viewModel.activeCart.first?.itemName.contains("Nasi Goreng") == true ? "Nasi Goreng 44" : (viewModel.activeCart.first != nil ? "Aneka Menu" : "Keranjang Belanja") //
-        let restaurantImageDisplay = viewModel.activeCart.first?.itemName.contains("Nasi Goreng") == true ? "nasi-goreng-44" : "foods" //
+    func cartHeader() -> some View {
+        // CORRECTED: Use restaurantNameDisplay derived from itemName
+        if !viewModel.activeCart.isEmpty {
+            let restaurantNameDisplay = viewModel.activeCart.first?.itemName.lowercased().contains("nasi goreng") == true ? "Nasi Goreng 44" : (viewModel.activeCart.first != nil ? "Aneka Menu" : "Keranjang Belanja Anda")
+            let restaurantImageDisplay = viewModel.activeCart.first?.itemName.lowercased().contains("nasi goreng") == true ? "nasi-goreng-44" : "foods"
 
-        if !viewModel.activeCart.isEmpty { //
-            HStack (alignment: .bottom) { //
-                Image(restaurantImageDisplay).resizable().scaledToFill().frame(width: 70, height: 70).clipped().cornerRadius(15) //
-                Text(restaurantNameDisplay).font(.title3).fontWeight(.semibold).padding(.leading, 10).padding(.bottom, 10) //
-                Spacer() //
-            }.padding(.top, 10) //
+            HStack(alignment: .bottom) {
+                Image(restaurantImageDisplay) // Use the derived image name
+                    .resizable().scaledToFill().frame(width: 70, height: 70).clipped().cornerRadius(15)
+                Text(restaurantNameDisplay) // Use the derived restaurant name
+                    .font(.title3).fontWeight(.semibold).padding(.leading, 10).padding(.bottom, 10)
+                Spacer()
+            }
+            .background(Color("Beige")) // Same background as body
         } else {
-            Text("Keranjang Belanja").font(.title2).fontWeight(.semibold).padding(.top, 10) //
+            Text("Keranjang Belanja Anda")
+                .font(.title2).fontWeight(.semibold)
+                .foregroundColor(Color("DarkBrown")) // Consistent color
+                .padding(.top, 10)
         }
     }
     
     @ViewBuilder
-    func emptyCartView() -> some View { //
-        Spacer() //
-        Image(systemName: "cart.fill").font(.system(size: 60)).foregroundColor(.gray.opacity(0.5)) //
-        Text("Keranjang Anda kosong.").font(.headline).foregroundColor(.gray).padding(.top) //
-        Text("Yuk, mulai pilih makanan favoritmu!").font(.subheadline).foregroundColor(.gray) //
-        Spacer() //
+    func emptyCartView() -> some View {
+        Spacer()
+        Image(systemName: "cart.fill")
+            .font(.system(size: 80)) // Larger icon size
+            .foregroundColor(.gray.opacity(0.4)) // Softer
+        Text("Keranjang Anda kosong.").font(.title3).foregroundColor(.gray).padding(.top, 10)
+        Text("Yuk, mulai pilih makanan favoritmu!").font(.body).foregroundColor(.gray)
+        Spacer()
     }
 
     @ViewBuilder
-    func cartContentList() -> some View { //
-        List {
-            ForEach($viewModel.activeCart) { $itemInCart in //
-                CartItemRowFromVM(item: $itemInCart, cartViewModel: viewModel)
-            }
-            .onDelete(perform: deleteItemsFromVM) //
-            
-            Section(header: Text("Ringkasan Pesanan").font(.headline)) { //
-                summaryRowCart(label: "Subtotal Item", value: viewModel.currentCartSubtotalItems) //
-                summaryRowCart(label: "Ongkos Kirim", value: viewModel.shippingFee) //
-                if viewModel.discount > 0 { //
-                    summaryRowCart(label: "Diskon", value: -viewModel.discount, color: .green) //
+    func orderSummarySection() -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Ringkasan Pesanan")
+                .font(.headline)
+                .foregroundColor(Color("DarkBrown")) // Consistent color
+
+            VStack(spacing: 8) {
+                summaryRowCart(label: "Subtotal Item", value: viewModel.currentCartSubtotalItems)
+                summaryRowCart(label: "Ongkos Kirim", value: viewModel.shippingFee)
+                if viewModel.discount > 0 {
+                    summaryRowCart(label: "Diskon", value: -viewModel.discount, color: .green)
                 }
-                summaryRowCart(label: "Total Pembayaran", value: viewModel.currentCartTotalPayable, isTotal: true) //
+                Divider() // Divider for total
+                summaryRowCart(label: "Total Pembayaran", value: viewModel.currentCartTotalPayable, isTotal: true)
             }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(15)
+            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2) // Soft shadow
         }
-        .listStyle(GroupedListStyle()) //
-        .frame(maxHeight: UIScreen.main.bounds.height * 0.45) // Sesuaikan maxHeight agar ada ruang untuk Picker dan Button
     }
     
     @ViewBuilder
-    func paymentMethodPicker() -> some View { //
-        VStack(alignment: .leading) { //
-            Text("Metode Pembayaran").font(.headline).padding(.top) //
-            Picker("Metode Pembayaran", selection: $selectedPaymentMethod) { //
-                ForEach(PaymentType.allCases) { method in //
-                    Text(method.rawValue).tag(method) //
+    func paymentMethodPicker() -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Metode Pembayaran")
+                .font(.headline)
+                .foregroundColor(Color("DarkBrown")) // Consistent color
+
+            Picker("Metode Pembayaran", selection: $selectedPaymentMethod) {
+                ForEach(PaymentType.allCases) { method in
+                    Text(method.rawValue).tag(method)
                 }
             }
-            .pickerStyle(SegmentedPickerStyle()) //
-            
-            if selectedPaymentMethod == .balance { //
-                HStack { //
-                    Text("Saldo Anda Saat Ini:") //
-                    Spacer() //
-                    if let userId = userSession.currentUserId { //
-                         Text("Rp\(String(format: "%.0f", DummyDataStore.shared.userBalances[userId] ?? 0.0))").fontWeight(.semibold) //
-                     } else { Text("N/A") } //
-                }.font(.footnote).padding(.vertical, 5) //
+            .pickerStyle(SegmentedPickerStyle())
+            .background(Color.white) // Picker background
+            .cornerRadius(10) // Rounded corners for picker
+            .clipped() // Ensure clipping if background/corner radius added
+
+            if selectedPaymentMethod == .balance {
+                HStack {
+                    Text("Saldo Anda Saat Ini:")
+                    Spacer()
+                    if let userId = userSession.currentUserId {
+                        Text("Rp\(String(format: "%.0f", DummyDataStore.shared.userBalances[userId] ?? 0.0))").fontWeight(.semibold)
+                            .foregroundColor(Color("DarkBrown")) // Consistent color
+                    } else { Text("N/A") }
+                }
+                .font(.footnote)
+                .padding(.vertical, 5)
+                .padding(.horizontal, 5) // Small padding to avoid crowding
+                .background(Color.white.opacity(0.7)) // Balance background
+                .cornerRadius(8)
             }
-        }.padding(.vertical, 10) //
+        }
     }
 
     @ViewBuilder
-    func placeOrderButton() -> some View { //
-        Button(action: { //
-            viewModel.checkout(paymentMethod: selectedPaymentMethod) //
+    func placeOrderButton() -> some View {
+        Button(action: {
+            viewModel.checkout(paymentMethod: selectedPaymentMethod)
         }) {
-            Text("BAYAR & PESAN SEKARANG (Rp\(String(format: "%.0f", viewModel.currentCartTotalPayable)))") //
-                .font(.system(size: 14)).fontWeight(.bold).foregroundColor(.white) //
-                .padding().frame(height: 50).frame(maxWidth: .infinity) //
-                .background(viewModel.activeCart.isEmpty || viewModel.paymentProcessing ? Color.gray : Color.red) //
-                .cornerRadius(25) //
+            Text("BAYAR & PESAN SEKARANG (Rp\(String(format: "%.0f", viewModel.currentCartTotalPayable)))")
+                .font(.system(size: 16)).fontWeight(.bold).foregroundColor(.white)
+                .padding(.vertical, 15) // Vertical padding
+                .frame(maxWidth: .infinity)
+                .background(viewModel.activeCart.isEmpty || viewModel.paymentProcessing ? Color.gray : Color.red)
+                .cornerRadius(25)
+                .shadow(color: .red.opacity(0.3), radius: 5, x: 0, y: 5) // Consistent shadow
         }
-        .padding(.vertical) //
-        .disabled(viewModel.activeCart.isEmpty || viewModel.paymentProcessing) //
+        .disabled(viewModel.activeCart.isEmpty || viewModel.paymentProcessing)
     }
 
-    func summaryRowCart(label: String, value: Double, isTotal: Bool = false, color: Color = .primary) -> some View { //
-        HStack { Text(label).foregroundColor(color); Spacer(); Text("Rp\(String(format: "%.0f", value))").foregroundColor(color) } //
-        .font(isTotal ? .system(size: 16, weight: .bold) : .system(size: 14)) //
+    func summaryRowCart(label: String, value: Double, isTotal: Bool = false, color: Color = .primary) -> some View {
+        HStack {
+            Text(label).foregroundColor(color)
+            Spacer()
+            Text("Rp\(String(format: "%.0f", value))").foregroundColor(color)
+        }
+        .font(isTotal ? .system(size: 16, weight: .bold) : .system(size: 14))
     }
 
-    func deleteItemsFromVM(at offsets: IndexSet) { //
-        let itemsToDelete = offsets.map { viewModel.activeCart[$0] } //
-        for item in itemsToDelete { viewModel.removeItemFromCart(itemId: item.id) } //
+    func deleteItemsFromVM(at offsets: IndexSet) {
+        let itemsToDelete = offsets.map { viewModel.activeCart[$0] }
+        for item in itemsToDelete { viewModel.removeItemFromCart(itemId: item.id) }
     }
 }
-
-// Pastikan CartItemRowFromVM sudah didefinisikan di proyek Anda
-// struct CartItemRowFromVM: View { ... }
-
-

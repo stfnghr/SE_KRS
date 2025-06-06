@@ -1,206 +1,207 @@
+// File: View/FoodCardView.swift (REVISED)
 import SwiftUI
 
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
 
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(roundedRect: rect,
-                                byRoundingCorners: corners,
-                                cornerRadii: CGSize(width: radius, height: radius))
-        return Path(path.cgPath)
-    }
-}
 
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape( RoundedCorner(radius: radius, corners: corners) )
-    }
-}
-
+// --- View Utama ---
 struct FoodCardView: View {
-    var menu: MenuModel
-    var restaurant: RestaurantModel
+    // Properti ini akan menentukan data apa yang akan ditampilkan
+    let restaurant: RestaurantModel?
+    let menuItem: MenuModel?
     
-    @State private var showingRestaurantClosedAlert = false
+    // State untuk alert
+    @State private var showingAlert = false
     @State private var alertMessage = ""
-    @State private var showingOutOfStockAlert = false // Untuk redCard
+    @State private var alertTitle = ""
+
+    // Inisialisasi untuk kartu Restoran
+    init(restaurant: RestaurantModel) {
+        self.restaurant = restaurant
+        self.menuItem = nil
+    }
+
+    // Inisialisasi untuk kartu Menu Item (Populer)
+    init(menuItem: MenuModel, restaurant: RestaurantModel) {
+        self.restaurant = restaurant // Tetap dibutuhkan untuk navigasi
+        self.menuItem = menuItem
+    }
     
     var body: some View {
-        if restaurant.menuItems.isEmpty && !menu.name.isEmpty {
-             redCard(menuItem: menu)
-        } else if !restaurant.name.isEmpty {
-             whiteCard(restaurant: restaurant)
-        } else {
-            // Fallback atau error view jika data tidak lengkap
-            Text("Data tidak valid untuk FoodCardView")
-        }
-    }
-    
-    @ViewBuilder
-    func whiteCard(restaurant: RestaurantModel) -> some View {
         Group {
-            if restaurant.isOpen {
+            if let restaurant = restaurant, menuItem == nil {
+                // --- Tampilan untuk Kartu Restoran (White Card) ---
                 NavigationLink(destination: MenuView(restaurant: restaurant)) {
-                    restaurantCardContent(restaurant: restaurant, isOpen: true)
+                    RestaurantCard(restaurant: restaurant)
                 }
                 .buttonStyle(PlainButtonStyle())
-            } else {
-                restaurantCardContent(restaurant: restaurant, isOpen: false)
-                    .onTapGesture {
-                        self.alertMessage = "Maaf, resto \(restaurant.name) lagi tutup (${restaurant.operationalHours}). Coba cari resto yang lain."
-                        self.showingRestaurantClosedAlert = true
+                .onTapGesture {
+                    if !restaurant.isOpen {
+                        self.alertTitle = "Restoran Tutup"
+                        self.alertMessage = "Maaf, \(restaurant.name) sedang tutup (${restaurant.operationalHours})."
+                        self.showingAlert = true
                     }
+                }
+            } else if let menuItem = menuItem, let restaurant = restaurant {
+                // --- Tampilan untuk Kartu Makanan Populer (Red Card) ---
+                 NavigationLink(destination: DetailMenuView(menuItem: menuItem)) {
+                    PopularMenuItemCard(menuItem: menuItem)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .onTapGesture {
+                    if !menuItem.isAvailable {
+                        self.alertTitle = "Stok Habis"
+                        self.alertMessage = "Maaf, \(menuItem.name) stoknya sedang habis."
+                        self.showingAlert = true
+                    }
+                }
             }
         }
-        .alert(isPresented: $showingRestaurantClosedAlert) {
-            Alert(title: Text("Restoran Tutup"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+        .alert(isPresented: $showingAlert) {
+            Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
     }
+}
 
-    @ViewBuilder
-    private func restaurantCardContent(restaurant: RestaurantModel, isOpen: Bool) -> some View {
-        ZStack(alignment: .bottomLeading) {
-            Rectangle()
-                .fill(Color.white)
-                .cornerRadius(15)
-                .frame(width: 175, height: 175)
-                .shadow(radius: 3, x: 0, y: 5)
 
-            VStack(alignment: .leading, spacing: 0) {
+// MARK: - Subview untuk Kartu Restoran
+struct RestaurantCard: View {
+    let restaurant: RestaurantModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // --- REVISI: Gambar dengan Overlay Status ---
+            ZStack {
                 Image(restaurant.image.isEmpty ? "foods" : restaurant.image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 175, height: 110)
                     .clipped()
-                    .cornerRadius(15, corners: [.topLeft, .topRight])
-                    .overlay(
-                        !isOpen ? Color.black.opacity(0.5).cornerRadius(15, corners: [.topLeft, .topRight]) : nil
-                    )
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(restaurant.name)
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(.black)
-                        .lineLimit(1)
-                    
-                    HStack {
-                        Image(systemName: "star.fill").foregroundColor(.orange).font(.caption)
-                        Text(String(format: "%.1f", restaurant.rating))
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-
-                    if !isOpen {
-                        Text(restaurant.operationalHours.uppercased())
-                            .font(.caption.bold())
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 3)
-                            .background(Color.red)
-                            .cornerRadius(4)
-                            .offset(y: -28)
-                    }
+                if !restaurant.isOpen {
+                    Color.black.opacity(0.4)
+                    Text("TUTUP")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Color.red.opacity(0.8))
+                        .cornerRadius(10)
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 8)
-                .frame(height: 65)
             }
-        }
-        .opacity(isOpen ? 1.0 : 0.7)
-    }
-
-    @ViewBuilder
-    func redCard(menuItem: MenuModel) -> some View {
-        Group {
-            if menuItem.isAvailable {
-                NavigationLink(destination: DetailMenuView(menuItem: menuItem)) {
-                    menuItemCardContent(menuItem: menuItem)
-                }
-                .buttonStyle(PlainButtonStyle())
-            } else {
-                menuItemCardContent(menuItem: menuItem)
-                    .onTapGesture {
-                        self.alertMessage = "Maaf, \(menuItem.name) stoknya habis."
-                        self.showingOutOfStockAlert = true
-                    }
-            }
-        }
-        .alert(isPresented: $showingOutOfStockAlert) {
-            Alert(title: Text("Stok Habis"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
-        }
-    }
-    
-    @ViewBuilder
-    private func menuItemCardContent(menuItem: MenuModel) -> some View {
-        ZStack(alignment: .bottom) {
-            Rectangle()
-                .fill(menuItem.isAvailable ? Color.red : Color.gray.opacity(0.7))
-                .cornerRadius(15)
-                .frame(width: 105, height: 100)
-                .shadow(radius: 3, x: 0, y: 5)
-
-            VStack(alignment: .center, spacing: 2) {
-                Image(menuItem.image.isEmpty ? "foods" : menuItem.image)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 105, height: 60)
-                    .clipped()
-                    .cornerRadius(15, corners: [.topLeft, .topRight])
-                     .overlay(
-                        !menuItem.isAvailable ? Color.black.opacity(0.5).cornerRadius(15, corners: [.topLeft, .topRight]) : nil
-                     )
+            .cornerRadius(15, corners: [.topLeft, .topRight])
+            
+            // --- REVISI: Konten Teks yang Lebih Rapi ---
+            VStack(alignment: .leading, spacing: 4) {
+                Text(restaurant.name)
+                    .font(.system(size: 15, weight: .bold)) // Ukuran konsisten
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
                 
-                Text(menuItem.name) // Tampilkan nama menu
-                    .font(.system(size: 12, weight: .semibold)) // Ukuran disesuaikan
+                HStack(spacing: 4) {
+                    Image(systemName: "star.fill")
+                        .foregroundColor(.orange)
+                    Text(String(format: "%.1f", restaurant.rating))
+                    Text("• est. 20 min") // Contoh info tambahan
+                }
+                .font(.caption) // Ukuran konsisten
+                .foregroundColor(.secondary) // Warna abu-abu untuk info sekunder
+            }
+            .padding(10)
+            .frame(width: 175, alignment: .leading)
+            .background(Color.white)
+            .cornerRadius(15, corners: [.bottomLeft, .bottomRight])
+        }
+        .cornerRadius(15)
+        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 4)
+        .opacity(restaurant.isOpen ? 1.0 : 0.7)
+    }
+}
+
+
+// MARK: - Subview untuk Kartu Makanan Populer
+struct PopularMenuItemCard: View {
+    let menuItem: MenuModel
+
+    var body: some View {
+        ZStack(alignment: .bottomLeading) { // Align semua konten ke bawah kiri
+            // 1. Gambar sebagai background
+            Image(menuItem.image.isEmpty ? "foods" : menuItem.image)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 150, height: 200) // Ukuran kartu dibuat lebih besar
+
+            // 2. Gradien gelap untuk keterbacaan teks
+            LinearGradient(
+                gradient: Gradient(colors: [.clear, .black.opacity(0.7)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+
+            // 3. Konten Teks (Nama & Harga)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(menuItem.name)
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.white)
-                    .lineLimit(2) // Biarkan dua baris jika nama panjang
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 4)
+                    .lineLimit(2)
                 
-                if !menuItem.isAvailable {
-                    Text("HABIS")
-                        .font(.caption2.bold())
-                        .foregroundColor(Color.red)
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 1)
-                        .background(Color.white.opacity(0.9))
-                        .cornerRadius(3)
-                }
+                Text("Rp\(String(format: "%.0f", menuItem.price))")
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(.white.opacity(0.9))
             }
-            .padding(.bottom, 5)
+            .padding(12)
+
+            // 4. Overlay jika stok habis
+            if !menuItem.isAvailable {
+                // Overlay gelap di seluruh kartu
+                Color.black.opacity(0.5)
+                
+                // Teks status di tengah
+                Text("STOK HABIS")
+                    .font(.caption.bold())
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.black.opacity(0.7))
+                    .cornerRadius(8)
+            }
         }
+        .frame(width: 150, height: 200)
+        .cornerRadius(15)
+        .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 4)
         .opacity(menuItem.isAvailable ? 1.0 : 0.7)
     }
 }
 
-#Preview("FoodCardView_AllStates") {
-    let availableMenu = MenuModel(name: "Nasi Goreng Okay", price: 20000, description: "Enak", category: "Nasi", image: "nasi-goreng", stock: 10)
-    let outOfStockMenu = MenuModel(name: "Mie Goreng Habis", price: 18000, description: "Lagi kosong", category: "Mie", image: "foods", stock: 0)
+
+// MARK: - Preview
+#Preview("FoodCardView") {
+    // Data dummy untuk semua state
+    let availableMenu = MenuModel(name: "Nasi Goreng Spesial", price: 20000, description: "Enak", category: "Nasi", image: "nasi-goreng", stock: 10)
+    let outOfStockMenu = MenuModel(name: "Mie Goreng Super Duper Panjang Habis", price: 18000, description: "Lagi kosong", category: "Mie", image: "foods", stock: 0)
     
     let openRestaurant = RestaurantModel(name: "Resto Buka Terus", address: "Jl. Ramai No. 1", rating: 4.5, image: "nasi-goreng-44", menuItems: [availableMenu], isOpen: true)
     let closedRestaurant = RestaurantModel(name: "Resto Tutup Dulu", address: "Jl. Sepi No. 9", rating: 3.0, image: "koopi", menuItems: [], isOpen: false, operationalHours: "SEDANG LIBUR")
 
     return ScrollView {
-        VStack(spacing: 15) {
-            Text("Restaurant Cards").font(.title2).fontWeight(.bold)
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Restaurant Cards").font(.title2.bold())
             HStack(spacing: 15) {
-                FoodCardView(menu: openRestaurant.menuItems.first ?? availableMenu, restaurant: openRestaurant)
-                    .whiteCard(restaurant: openRestaurant)
-                FoodCardView(menu: closedRestaurant.menuItems.first ?? outOfStockMenu, restaurant: closedRestaurant)
-                    .whiteCard(restaurant: closedRestaurant)
+                FoodCardView(restaurant: openRestaurant)
+                FoodCardView(restaurant: closedRestaurant)
             }
+            
             Divider().padding(.vertical)
-            Text("Menu Item Cards (Red)").font(.title2).fontWeight(.bold)
+            
+            Text("Popular Menu Cards").font(.title2.bold())
             HStack(spacing: 15) {
-                FoodCardView(menu: availableMenu, restaurant: openRestaurant)
-                    .redCard(menuItem: availableMenu)
-                FoodCardView(menu: outOfStockMenu, restaurant: openRestaurant) // Restoran bisa dummy jika hanya info menu
-                    .redCard(menuItem: outOfStockMenu)
+                FoodCardView(menuItem: availableMenu, restaurant: openRestaurant)
+                FoodCardView(menuItem: outOfStockMenu, restaurant: openRestaurant)
             }
         }
         .padding()
-        .environmentObject(CartViewModel(userSession: UserSession()))
-        .environmentObject(UserSession())
+        .background(Color.gray.opacity(0.1))
     }
+    .environmentObject(UserSession())
+    .environmentObject(CartViewModel(userSession: UserSession()))
 }
