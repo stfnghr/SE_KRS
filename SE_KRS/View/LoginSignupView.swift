@@ -141,6 +141,33 @@ struct LoginSignupView: View { //
     }
 }
 
+// MARK: - Helper ViewModifiers (Jika Anda menggunakannya)
+struct FormTextFieldStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: 50)
+            .foregroundColor(.black) // Changed for testing
+            .background(Color.white) // Changed for testing
+            .cornerRadius(30)
+            .shadow(color: .gray.opacity(0.3), radius: 3, x: 2, y: 2)
+    }
+}
+
+struct PrimaryButtonStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .fontWeight(.bold) //
+            .foregroundColor(.white) //
+            .frame(maxWidth: .infinity) //
+            .padding() //
+            .background(Color.red) //
+            .cornerRadius(25) //
+            .shadow(color: .red.opacity(0.4), radius: 5, x: 0, y: 5) // Tambahkan shadow pada tombol
+    }
+}
+
 
 #Preview { //
     LoginSignupView() //

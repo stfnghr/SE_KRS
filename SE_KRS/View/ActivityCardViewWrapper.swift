@@ -9,7 +9,7 @@ struct ActivityCardViewWrapper: View { //
             Rectangle() //
                 .fill(Color.white) //
                 .frame(maxWidth: .infinity) //
-                .frame(height: 130) //
+                .frame(height: 120) //
                 .cornerRadius(20) //
                 .shadow(radius: 3, x: 0, y: 3) //
 
@@ -38,7 +38,7 @@ struct ActivityCardViewWrapper: View { //
                         .font(.system(size: 14, weight: .semibold)) //
                         .foregroundColor(.red) //
                     
-                    Text("\(order.timestampCreated, style: .date)") //
+                    Text("Tanggal: \(order.timestampCreated, style: .date)") //
                         .font(.system(size: 12)) //
                         .foregroundColor(.orange) //
                 }

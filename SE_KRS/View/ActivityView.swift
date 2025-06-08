@@ -84,4 +84,3 @@ struct ActivityView: View { //
         }
     }
 }
-
