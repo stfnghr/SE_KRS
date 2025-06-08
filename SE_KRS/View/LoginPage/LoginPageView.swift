@@ -5,6 +5,7 @@ struct LoginView: View {
     @EnvironmentObject var userSession: UserSession
     @State private var email = ""
     @State private var password = ""
+    @State private var isLoginSuccessful = false
 
     // State untuk alert
     @State private var showingAlert = false
@@ -12,6 +13,7 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
+            Color("Beige").ignoresSafeArea()
             Color(red: 255/255, green: 241/255, blue: 230/255).edgesIgnoringSafeArea(.all)
 
             ScrollView {
@@ -46,6 +48,14 @@ struct LoginView: View {
                     }
                     .padding(.top, 40)
 
+                    NavigationLink(
+                        destination: MainView().navigationBarBackButtonHidden(
+                            true),
+                        isActive: $isLoginSuccessful
+                    ) {
+                        EmptyView()  // Tampilannya kosong karena kita tidak ingin menampilkannya
+                    }
+
                     HStack {
                         Text("Belum punya akun?")
                         NavigationLink(
@@ -53,6 +63,7 @@ struct LoginView: View {
                         )
                         .foregroundColor(.red)
                         .fontWeight(.bold)
+                        .navigationBarBackButtonHidden(true)
                     }
                     .font(.footnote)
                     .frame(maxWidth: .infinity)
@@ -86,6 +97,8 @@ struct LoginView: View {
             balance: 150000)
 
         userSession.loginUser(user: loggedInUser, message: "Login Berhasil!")
+
+        isLoginSuccessful = true
     }
 }
 

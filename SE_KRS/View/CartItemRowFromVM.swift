@@ -29,7 +29,6 @@ struct CartItemRowFromVM: View {
                     if item.quantity > 1 {
                         cartViewModel.updateItemQuantityInCart(itemId: item.id, newQuantity: item.quantity - 1)
                     } else {
-                        // Jika quantity 1 dan dikurangi, hapus item
                         cartViewModel.removeItemFromCart(itemId: item.id)
                     }
                 } label: {
