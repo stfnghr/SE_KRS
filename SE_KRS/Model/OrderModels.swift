@@ -51,3 +51,4 @@ struct Order: Identifiable, Codable, Hashable {
         return subTotalItems + shippingFee - discount
     }
 }
+

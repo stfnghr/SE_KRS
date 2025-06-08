@@ -1,4 +1,3 @@
-// File: ViewModel/ProfileViewModel.swift
 import Foundation
 import Combine
 
@@ -7,9 +6,6 @@ class ProfileViewModel: ObservableObject {
     @Published var alertMessage: String = ""
     @Published var showAlert: Bool = false
 
-    // Simpan UserSession sebagai @ObservedObject atau teruskan sebagai parameter
-    // jika ProfileViewModel dibuat oleh View yang sudah memiliki UserSession.
-    // Untuk @StateObject di View, kita akan meneruskannya di init.
     private var userSession: UserSession
     private let dataStore = DummyDataStore.shared
     private var cancellables = Set<AnyCancellable>()
@@ -17,15 +13,13 @@ class ProfileViewModel: ObservableObject {
     init(userSession: UserSession) {
         self.userSession = userSession
         
-        // Amati perubahan pada currentUserId atau loggedInUser dari userSession
-        userSession.$loggedInUser // Mengamati loggedInUser lebih baik karena kita butuh balance awal
-            .compactMap { $0 } // Hanya proses jika user tidak nil
+        userSession.$loggedInUser
+            .compactMap { $0 }
             .sink { [weak self] userModel in
                 self?.fetchBalance(for: userModel.id.uuidString)
             }
             .store(in: &cancellables)
         
-        // Ambil saldo awal jika pengguna sudah login saat ViewModel dibuat
         if let initialUserId = userSession.currentUserId {
              fetchBalance(for: initialUserId)
         }
@@ -55,7 +49,7 @@ class ProfileViewModel: ObservableObject {
         let currentBalanceInStore = dataStore.userBalances[userId] ?? 0.0
         let newBalance = currentBalanceInStore + amount
         dataStore.userBalances[userId] = newBalance
-        self.userBalance = newBalance // Update published property
+        self.userBalance = newBalance
 
         let transactionId = dataStore.generateTransactionId()
         let transaction = TransactionModels(
@@ -74,3 +68,4 @@ class ProfileViewModel: ObservableObject {
         showAlert = true
     }
 }
+

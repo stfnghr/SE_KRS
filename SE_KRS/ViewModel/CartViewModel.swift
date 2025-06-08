@@ -121,21 +121,18 @@ class CartViewModel: ObservableObject {
                     paymentSucceeded = true
                     transactionStatus = .success
                     transactionDescription = "Pembayaran pesanan #\(newOrderId) dengan saldo berhasil."
-                    // Update saldo di ProfileViewModel jika perlu refresh UI langsung
-                    // NotificationCenter.default.post(name: .didUpdateBalance, object: nil)
                 } else {
-                    transactionStatus = .failed // Eksplisit set gagal
+                    transactionStatus = .failed
                     transactionDescription = "Pembayaran gagal. Saldo tidak mencukupi. Butuh Rp\(String(format: "%.0f", finalAmountToPay - currentBalance)) lagi."
                 }
                 
             case .creditCard:
                 paymentMethodDetailDesc = "Kartu Kredit (Dummy)"
-                // Simulasi kartu kredit ditolak (misalnya jika totalAmount > 50000)
-                if finalAmountToPay <= 50000 { // Simulasi berhasil jika <= 50rb
+                if finalAmountToPay <= 50000 {
                     paymentSucceeded = true
                     transactionStatus = .success
                     transactionDescription = "Pembayaran pesanan #\(newOrderId) dengan kartu kredit (dummy) berhasil."
-                } else { // Simulasi gagal jika > 50rb
+                } else {
                     paymentSucceeded = false
                     transactionStatus = .failed
                     transactionDescription = "Pembayaran pesanan #\(newOrderId) dengan kartu kredit (dummy) ditolak (Limit Terlampaui)."
@@ -155,8 +152,6 @@ class CartViewModel: ObservableObject {
                 self.alertMessage = transactionDescription
             }
             
-            // Selalu simpan order, baik berhasil maupun gagal bayar (dengan status yang sesuai)
-            // Jika sudah ada (misal dibuat sebelum switch payment), update. Jika belum, append.
             if let orderIndex = self.dataStore.orders.firstIndex(where: { $0.id == newOrderId }) {
                  self.dataStore.orders[orderIndex] = order
             } else {
@@ -183,3 +178,4 @@ class CartViewModel: ObservableObject {
         }
     }
 }
+
