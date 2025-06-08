@@ -3,6 +3,10 @@ import SwiftUI
 
 struct LandingView: View {
     var body: some View {
+        // Anda TIDAK PERLU @EnvironmentObject di sini, karena LandingView tidak
+        // secara langsung menggunakan userSession. Ia hanya perlu meneruskannya
+        // ke view selanjutnya (LoginView/SignUpView), dan itu terjadi secara otomatis.
+        
         NavigationView {
             ZStack {
                 // Background color yang senada dengan tema aplikasi
@@ -20,7 +24,7 @@ struct LandingView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(.orange) // Buat custom color "DarkBrown"
+                        .foregroundColor(.orange)
 
                     Text("Pesan makanan favoritmu dengan mudah dan cepat, kapan pun, di mana pun.")
                         .font(.headline)
@@ -34,6 +38,8 @@ struct LandingView: View {
 
                     // Tombol Aksi
                     VStack(spacing: 15) {
+                        // LoginView dan SignUpView akan secara otomatis menerima
+                        // userSession dari environment yang di-provide oleh SE_KRSApp
                         NavigationLink(destination: LoginView()) {
                             Text("MASUK")
                                 .modifier(PrimaryButtonStyle())
@@ -55,13 +61,15 @@ struct LandingView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .navigationBarHidden(true) // Sembunyikan navigation bar di halaman ini
+            .navigationBarHidden(true)
         }
-        .environmentObject(UserSession()) // Sediakan UserSession untuk preview
-        .accentColor(.red) // Mengubah warna back button di halaman selanjutnya menjadi merah
+        // HAPUS BARIS .environmentObject(UserSession()) DARI SINI
+        .accentColor(.red)
     }
 }
 
 #Preview {
     LandingView()
+        // Baris di bawah ini TIDAK MASALAH, karena hanya untuk keperluan preview.
+        .environmentObject(UserSession())
 }

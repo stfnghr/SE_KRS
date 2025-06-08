@@ -14,6 +14,7 @@ struct HistoryOrderViewFromVM: View {
                     Rectangle()  //
                         .fill(.white)  //
                         .frame(maxWidth: .infinity)
+                        .frame(height: 500)
                         .cornerRadius(20)  //
                         .shadow(radius: 3, x: 0, y: 3)  //
                         .overlay(
