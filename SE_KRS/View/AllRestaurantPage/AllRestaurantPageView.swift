@@ -15,8 +15,6 @@ struct AllRestaurantsView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(restaurants) { restaurant in
-                    // --- REVISI PEMANGGILAN ---
-                    // Panggil init yang benar dan hapus .whiteCard
                     FoodCardView(restaurant: restaurant)
                 }
             }
@@ -29,7 +27,6 @@ struct AllRestaurantsView: View {
 }
 
 #Preview {
-    // Contoh data untuk preview
     let dummyRestaurants: [RestaurantModel] = [
         RestaurantModel(id: UUID(), name: "Nasi Goreng Jaya", address: "Jl. Raya Kemenangan No. 1", rating: 4.8, image: "nasi-goreng-44", menuItems: [], isOpen: true),
         RestaurantModel(id: UUID(), name: "Bubur Ayam Nikmat", address: "Jl. Pagi Hari No. 2", rating: 4.5, image: "bubur-ayam-sby", menuItems: [], isOpen: true),
