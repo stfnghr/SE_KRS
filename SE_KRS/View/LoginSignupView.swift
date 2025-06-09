@@ -126,7 +126,7 @@ struct LoginSignupView: View { //
         // atau Anda bisa memiliki logika untuk mencari user yang "sudah terdaftar" di DummyDataStore.
         // Untuk kesederhanaan, kita buat UserModel baru dengan data yang diinput + saldo dummy.
         
-        let loggedInUser = UserModel(name: name.isEmpty ? "Pengguna Login" : name, // Gunakan nama jika diisi saat sign up, atau default
+        let loggedInUser = UserModel(name: name.isEmpty ? "Guest User" : name, // Gunakan nama jika diisi saat sign up, atau default
                                      phone: phoneNumber.isEmpty ? "08123456789" : phoneNumber,
                                      email: email,
                                      password: password, // Seharusnya password di-hash dan diverifikasi

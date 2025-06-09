@@ -30,6 +30,7 @@ struct OrderModels: Identifiable, Codable, Hashable {
     var id: String { itemId + "_\(pricePerItem)_\(UUID().uuidString)" }
 }
 
+// PENYESUAIAN: Struct Order dilengkapi dengan properti yang hilang
 struct Order: Identifiable, Codable, Hashable {
     let id: String
     let userId: String

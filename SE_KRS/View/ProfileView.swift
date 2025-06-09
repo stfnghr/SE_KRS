@@ -1,131 +1,147 @@
-// File: View/ProfileView.swift
+// File: View/ProfileView.swift (REVISED)
 import SwiftUI
 
-struct ProfileView: View { //
-    @EnvironmentObject var userSession: UserSession // Untuk info user dan logout
+struct ProfileView: View {
+    @EnvironmentObject var userSession: UserSession
     @StateObject private var viewModel: ProfileViewModel
     
     @State private var topUpAmountString: String = ""
 
-    init(userSession: UserSession) { // Terima UserSession untuk inisialisasi ViewModel
+    init(userSession: UserSession) {
         _viewModel = StateObject(wrappedValue: ProfileViewModel(userSession: userSession))
     }
 
-    var body: some View { //
+    var body: some View {
         NavigationView {
-            ZStack { //
-                Color(red: 255 / 255, green: 180 / 255, blue: 75 / 255) //
-                    .ignoresSafeArea(.all) //
-
-                Rectangle() //
-                    .fill(Color(red: 255 / 255, green: 241 / 255, blue: 230 / 255)) //
-                    .cornerRadius(30) //
-                    .padding(.top, 200) //
-                    .ignoresSafeArea(.all) //
-
+            // PERUBAHAN: Menggunakan ZStack hanya untuk latar belakang yang sederhana
+            ZStack {
+                Color.lightBackground.ignoresSafeArea()
+                
                 ScrollView {
                     VStack(spacing: 20) {
-                        profileHeader()
-                        balanceSectionFromViewModel()
-                        topUpSectionFromViewModel()
-                        Spacer()
-                        logoutButton()
+                        // PERUBAHAN: Semua elemen UI di dalam VStack utama
+                        profileHeaderCard
+                        
+                        balanceCard
+                        
+                        topUpCard
+                        
+                        Spacer(minLength: 30)
+                        
+                        logoutButton
                     }
-                    .padding(.top, 60)
+                    .padding()
+                    .padding(.top, 10)
                 }
             }
-            .navigationTitle("Profile")
+            .navigationTitle("Profil")
             .navigationBarTitleDisplayMode(.inline)
             .alert(isPresented: $viewModel.showAlert) {
                 Alert(title: Text("Info"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("OK")))
             }
-            .onAppear { // Penting untuk memuat saldo saat view muncul atau user berubah
+            .onAppear {
                 viewModel.fetchBalance()
             }
         }
     }
-
-    // profileHeader dan logoutButton menggunakan @EnvironmentObject userSession
-    @ViewBuilder
-    func profileHeader() -> some View { //
-        // ... (Konten sama seperti sebelumnya, menggunakan userSession.loggedInUser)
-        VStack { //
-            Circle() //
-                .fill(.white) //
-                .frame(width: 110, height: 110) //
-                .overlay(
-                    Image(systemName: "person.fill")
-                        .resizable().scaledToFit().frame(width: 60, height: 60).foregroundColor(.gray)
-                )
-                .padding(.bottom, -55).zIndex(1) //
-
-            VStack(alignment: .center) { //
-                Text(userSession.loggedInUser?.name ?? "Guest User").font(.title).fontWeight(.bold).foregroundColor(Color(red: 255 / 255, green: 180 / 255, blue: 75 / 255)) //
-                Text(userSession.loggedInUser?.phone ?? "+62 000-0000-0000").font(.subheadline) //
-                Text(userSession.loggedInUser?.email ?? "guest@example.com").font(.subheadline).foregroundColor(.black).padding(.bottom, 5) //
-            }
-            .frame(maxWidth: .infinity).padding(.top, 70).padding(.horizontal, 40) //
-        }
-    }
-
-    @ViewBuilder
-    func balanceSectionFromViewModel() -> some View {
-        // ... (Konten sama seperti sebelumnya, menggunakan viewModel.userBalance)
-        VStack(alignment: .leading, spacing: 10) {
-            Text("My Balance").font(.headline)
-            HStack {
-                Image(systemName: "creditcard.fill").foregroundColor(.orange)
-                Text("Rp \(String(format: "%.0f", viewModel.userBalance))").font(.title2).fontWeight(.semibold)
-                Spacer()
-            }
-        }.padding().background(Color.white).cornerRadius(10).shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2).padding(.horizontal)
-    }
-
-    @ViewBuilder
-    func topUpSectionFromViewModel() -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Top Up Balance").font(.headline)
-            HStack {
-                TextField("Enter amount", text: $topUpAmountString)
-                    .keyboardType(.numberPad)
-                    .padding(8)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(5)
+    
+    // MARK: - Subviews
+    
+    private var profileHeaderCard: some View {
+        HStack(spacing: 16) {
+            Image(systemName: "person.crop.circle.fill")
+                .font(.system(size: 64))
+                .foregroundColor(.secondaryText.opacity(0.5))
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(userSession.loggedInUser?.name ?? "Nama Pengguna")
+                    .font(.title2)
+                    .fontWeight(.bold)
                 
-                // --- REVISI LOGIKA TOMBOL ---
-                Button(action: {
-                    // Menggunakan if-let untuk menghindari 'return'
-                    if let amount = Double(topUpAmountString), amount > 0 {
-                        viewModel.topUpBalance(amount: amount)
-                        topUpAmountString = ""
-                    } else {
-                        viewModel.alertMessage = "Please enter a valid positive amount."
-                        viewModel.showAlert = true
-                    }
-                }) {
-                    Text("Top Up")
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 15)
-                        .padding(.vertical, 8)
-                        .background(Color.green)
-                        .cornerRadius(25)
-                }
-                // ---------------------------
+                Text(userSession.loggedInUser?.email ?? "email@pengguna.com")
+                    .font(.subheadline)
+                    .foregroundColor(.secondaryText)
+            }
+            Spacer()
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 5, y: 3)
+    }
+    
+    private var balanceCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Saldo Saya")
+                .font(.headline)
+                .foregroundColor(.secondaryText)
+            
+            HStack {
+                Image(systemName: "creditcard.fill")
+                    .foregroundColor(.primaryRed)
+                Text("Rp \(String(format: "%.0f", viewModel.userBalance))")
+                    .font(.title)
+                    .fontWeight(.bold)
+                Spacer()
             }
         }
         .padding()
         .background(Color.white)
-        .cornerRadius(10)
-        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
-        .padding(.horizontal)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 5, y: 3)
+    }
+
+    private var topUpCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Isi Ulang Saldo")
+                .font(.headline)
+            
+            HStack(spacing: 10) {
+                TextField("Masukkan Jumlah", text: $topUpAmountString)
+                    .keyboardType(.numberPad)
+                    .padding()
+                    .background(Color.lightBackground)
+                    .cornerRadius(10)
+                
+                Button(action: {
+                    if let amount = Double(topUpAmountString), amount > 0 {
+                        viewModel.topUpBalance(amount: amount)
+                        topUpAmountString = ""
+                        // Sembunyikan keyboard
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    } else {
+                        viewModel.alertMessage = "Masukkan jumlah yang valid."
+                        viewModel.showAlert = true
+                    }
+                }) {
+                    Text("Top Up")
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 24)
+                        .frame(maxHeight: .infinity)
+                        .background(Color.green)
+                        .cornerRadius(10)
+                }
+            }
+            .frame(height: 50)
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 5, y: 3)
     }
     
-    @ViewBuilder
-    func logoutButton() -> some View { //
-        // ... (Konten sama seperti sebelumnya, memanggil userSession.logoutUser)
-        Button(action: { userSession.logoutUser() }) { //
-            Text("LOG OUT").fontWeight(.bold).foregroundColor(.white).frame(maxWidth: .infinity).padding().background(Color.red.opacity(0.8)).cornerRadius(25) //
-        }.padding(.horizontal).padding(.bottom, 20)
+    private var logoutButton: some View {
+        Button(action: {
+            userSession.logoutUser()
+        }) {
+            Text("LOG OUT")
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.primaryRed)
+                .cornerRadius(15)
+        }
     }
 }

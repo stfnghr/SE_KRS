@@ -1,19 +1,13 @@
-// File: ViewModel/UserSession.swift
-
-// --- REVISI: Tambahkan import Combine dan SwiftUI ---
 import Foundation
 import Combine
 import SwiftUI
-// ---------------------------------------------------
 
 class UserSession: ObservableObject {
     @Published var currentUserId: String?
     @Published var loggedInUser: UserModel?
-
     @Published var showStatusNotification: Bool = false
     @Published var statusNotificationMessage: String = ""
 
-    // Properti ini membutuhkan 'import Combine'
     private var cancellables = Set<AnyCancellable>()
     private let dataStore = DummyDataStore.shared
 
@@ -27,7 +21,6 @@ class UserSession: ObservableObject {
         
         self.statusNotificationMessage = message
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            // Fungsi 'withAnimation' membutuhkan 'import SwiftUI'
             withAnimation {
                 self.showStatusNotification = true
             }

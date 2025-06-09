@@ -134,19 +134,6 @@ struct HistoryView: View {
                             .padding(.vertical, 30)
                         ).padding(30)
                 } .frame(maxHeight: .infinity, alignment: .top)
-
-                //                Button(action: {}) {
-                //                    Text("DOWNLOAD RECEIPT")
-                //                        .font(.system(size: 14))
-                //                        .fontWeight(.bold)
-                //                        .foregroundColor(.white)
-                //                        .padding()
-                //                        .frame(height: 40)
-                //                        .frame(maxWidth: .infinity)
-                //                        .background(Color.red)
-                //                        .cornerRadius(25)
-                //                        .padding(.top)
-                //                }
             }
         }
         .navigationTitle("Your Receipt")
