@@ -5,14 +5,13 @@ struct LandingView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Latar belakang diubah menjadi abu-abu muda, sama seperti Login Page
                 Color(red: 245/255, green: 245/255, blue: 245/255).ignoresSafeArea()
                 
                 ScrollView {
                     VStack(spacing: 20) {
                         Spacer(minLength: 100)
                         
-                        // Menggunakan ikon dan teks yang menyambut pengguna baru
+                
                         Image(systemName: "fork.knife.circle.fill")
                             .font(.system(size: 60))
                             .foregroundColor(.red)
@@ -53,7 +52,7 @@ struct LandingView: View {
                         
                         Spacer()
                     }
-                    .padding(.horizontal, 30) // Padding container disamakan dengan Login Page
+                    .padding(.horizontal, 30)
                 }
             }
             .navigationBarHidden(true)
