@@ -32,8 +32,7 @@ struct HomeView: View { //
         MenuModel(id: UUID(), name: "Roti Bakar Cokelat Keju", price: 15000, description: "Manis gurih", category: "Roti", image: "koopi", stock: 9) //
     ]
     
-    // dummyRestaurantForPopularMenu sekarang hanya membutuhkan struktur dasar RestaurantModel,
-    // karena menu item spesifiknya akan datang dari popularMenus
+
     let dummyRestaurantPlaceholder = RestaurantModel(id: UUID(), name: "Popular Spot", address: "Various", rating: 0, image: "foods", menuItems: []) //
 
 
@@ -50,7 +49,7 @@ struct HomeView: View { //
                     
                     ScrollView { //
                         VStack(spacing: 20) {
-                            ImageCarouselView() // Pemanggilan yang benar
+                            ImageCarouselView() 
                             RestoSekitarmuSection(restaurants: dummyRestaurants)
                             PilihMakananmuSection(popularMenus: popularMenus, dummyRestaurant: dummyRestaurantPlaceholder)
                         }
@@ -64,7 +63,6 @@ struct HomeView: View { //
     }
 }
 
-// MARK: - Subview untuk SearchBar (Pastikan ini ada di file ini atau file terpisah)
 struct SearchBarView: View { //
     @Binding var search: String
 
@@ -139,8 +137,6 @@ struct RestoSekitarmuSection: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 15) {
                     ForEach(restaurants) { restaurant in
-                        // --- REVISI PEMANGGILAN ---
-                        // Kita panggil init yang benar dan hapus .whiteCard
                         FoodCardView(restaurant: restaurant)
                     }
                 }.padding(.horizontal)
@@ -154,7 +150,7 @@ struct PilihMakananmuSection: View {
     var popularMenus: [MenuModel]
     var dummyRestaurant: RestaurantModel
     
-    // REVISI: Mengatur grid dengan kolom yang ukurannya fleksibel
+
     private let columns: [GridItem] = [
         GridItem(.flexible(), spacing: 15),
         GridItem(.flexible(), spacing: 15)
@@ -170,9 +166,9 @@ struct PilihMakananmuSection: View {
                 }
             }.padding(.horizontal).padding(.top)
             
-            // REVISI: Kembali menggunakan LazyVGrid untuk layout yang lebih baik
+        
             LazyVGrid(columns: columns, spacing: 20) {
-                ForEach(popularMenus.prefix(4)) { menu_item in // Hanya tampilkan 4 item di home
+                ForEach(popularMenus.prefix(4)) { menu_item in
                     FoodCardView(menuItem: menu_item, restaurant: dummyRestaurant)
                 }
             }
@@ -184,6 +180,5 @@ struct PilihMakananmuSection: View {
 #Preview { //
     HomeView()
         .environmentObject(CartViewModel(userSession: UserSession()))
-        // .environmentObject(RestaurantViewModel()) // Jika RestaurantViewModel digunakan
-        .environmentObject(UserSession()) // Untuk UserSession jika diperlukan oleh subview lain
+        .environmentObject(UserSession()) 
 }
