@@ -1,15 +1,15 @@
-// File: View/MenuCardView.swift (REVISED)
+// File: View/Menu/MenuCardView.swift (REVISED)
 import SwiftUI
 
 struct MenuCardView: View {
     var menuItem: MenuModel
+    // userSession diakses melalui cartViewModel
     @EnvironmentObject var cartViewModel: CartViewModel
 
     // State untuk UI
     @State private var isLiked = false
     
-    // State untuk notifikasi
-    @State private var showingAddedToCartAlert = false
+    // State untuk notifikasi (hanya untuk stok habis)
     @State private var showingOutOfStockAlert = false
     @State private var alertMessage = ""
 
@@ -60,9 +60,7 @@ struct MenuCardView: View {
         .background(Color.white)
         .cornerRadius(20)
         .shadow(color: .black.opacity(0.08), radius: 5, x: 0, y: 4)
-        .alert(isPresented: $showingAddedToCartAlert) {
-            Alert(title: Text("Berhasil"), message: Text("\(menuItem.name) telah ditambahkan ke keranjang."), dismissButton: .default(Text("OK")))
-        }
+        // Alert untuk item berhasil ditambahkan sudah dihapus, karena kita pakai notifikasi global
         .alert(isPresented: $showingOutOfStockAlert) {
             Alert(title: Text("Stok Habis"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
@@ -74,7 +72,12 @@ struct MenuCardView: View {
         Button(action: {
             if menuItem.isAvailable {
                 cartViewModel.addItemToCart(menuItem: menuItem)
-                showingAddedToCartAlert = true
+                
+                // --- PERUBAHAN: MEMICU NOTIFIKASI GLOBAL ---
+                // Menggunakan sistem notifikasi yang sama seperti saat login.
+                cartViewModel.userSession.statusNotificationMessage = "\(menuItem.name) ditambahkan!"
+                cartViewModel.userSession.showStatusNotification = true
+
             } else {
                 alertMessage = "Maaf, \(menuItem.name) stoknya habis."
                 showingOutOfStockAlert = true
@@ -89,24 +92,5 @@ struct MenuCardView: View {
                 .cornerRadius(10)
         }
         .disabled(!menuItem.isAvailable)
-    }
-}
-
-
-#Preview {
-    let availableMenuItem = MenuModel(id: UUID(), name: "Nasi Goreng Enak", price: 22000, description: "Nasi goreng spesial dengan telur mata sapi dan topping melimpah.", category: "Nasi", image: "nasi-goreng", stock: 5)
-    let outOfStockMenuItem = MenuModel(id: UUID(), name: "Mie Ayam Habis", price: 18000, description: "Mie ayam spesial, sayangnya lagi kosong.", category: "Mie", image: "foods", stock: 0)
-
-    let userSession = UserSession()
-    let cartVM = CartViewModel(userSession: userSession)
-
-    return ScrollView {
-        VStack(spacing: 15) {
-            MenuCardView(menuItem: availableMenuItem)
-            MenuCardView(menuItem: outOfStockMenuItem)
-        }
-        .padding()
-        .background(Color.gray.opacity(0.1))
-        .environmentObject(cartVM)
     }
 }

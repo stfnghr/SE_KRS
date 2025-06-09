@@ -1,45 +1,55 @@
-// File: View/ActivityView.swift
+// File: View/ActivityView.swift (REVISED)
 import SwiftUI
 
-struct ActivityView: View { //
-    @EnvironmentObject var userSession: UserSession // Untuk diteruskan ke ViewModel
+struct ActivityView: View {
+    @EnvironmentObject var userSession: UserSession
     @StateObject private var viewModel: ActivityViewModel
     
-    @State private var selectedIndex = 0 //
-    let options = ["On Process", "History"] //
+    // State untuk picker
+    @State private var selectedIndex = 0
+    private let options = ["Dalam Proses", "Riwayat"]
 
     init(userSession: UserSession) {
         _viewModel = StateObject(wrappedValue: ActivityViewModel(userSession: userSession))
     }
 
-    var body: some View { //
+    var body: some View {
         NavigationStack {
-            ZStack { //
-                Color(red: 255 / 255, green: 241 / 255, blue: 230 / 255) //
-                    .ignoresSafeArea(.all)
+            ZStack {
+                // Latar belakang yang konsisten
+                Color(red: 245/255, green: 245/255, blue: 245/255).ignoresSafeArea()
                 
-                VStack { //
-                    Text("Your Activity") //
-                        .font(.title).fontWeight(.bold).padding()
+                VStack(spacing: 0) {
+                    Text("Aktivitas Anda")
+                        .font(.title2).bold()
+                        .padding()
                     
-                    Picker("", selection: $selectedIndex) { //
-                        ForEach(0..<options.count, id: \.self) { Text(options[$0]) }
+                    Picker("Pilih Tipe Aktivitas", selection: $selectedIndex) {
+                        ForEach(0..<options.count, id: \.self) { index in
+                            Text(options[index]).tag(index)
+                        }
                     }
-                    .pickerStyle(SegmentedPickerStyle()).padding() //
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
+                    .padding(.bottom, 15)
                     
                     if viewModel.isLoading {
-                        ProgressView("Loading activities...")
+                        ProgressView("Memuat aktivitas...")
                         Spacer()
                     } else if !userSession.isLoggedIn {
-                        Text("Please log in to see your activity.").foregroundColor(.gray)
-                        Spacer()
+                        // Tampilan jika pengguna belum login
+                        activityEmptyView(
+                            icon: "person.crop.circle.badge.xmark",
+                            title: "Anda Belum Login",
+                            message: "Silakan login terlebih dahulu untuk melihat aktivitas pesanan Anda."
+                        )
                     } else {
-                        contentForSelectedIndexFromVM()
+                        // Tampilan berdasarkan pilihan picker
+                        contentForSelectedIndex
                     }
                 }
             }
         }
-        .tint(.orange) //
         .onAppear {
             if userSession.isLoggedIn {
                 viewModel.fetchAllUserOrders()
@@ -47,30 +57,40 @@ struct ActivityView: View { //
         }
     }
     
+    // MARK: - Subviews
+    
     @ViewBuilder
-    func contentForSelectedIndexFromVM() -> some View {
-        if selectedIndex == 0 { // On Process
+    private var contentForSelectedIndex: some View {
+        if selectedIndex == 0 { // Dalam Proses
             if viewModel.onProcessOrders.isEmpty {
-                Text("No orders currently in process.").foregroundColor(.gray).padding()
+                activityEmptyView(
+                    icon: "shippingbox.fill",
+                    title: "Tidak Ada Pesanan",
+                    message: "Saat ini tidak ada pesanan yang sedang diproses."
+                )
             } else {
-                ScrollView { //
-                    VStack(spacing: 16) { //
+                ScrollView {
+                    LazyVStack(spacing: 15) {
                         ForEach(viewModel.onProcessOrders) { order in
-                            NavigationLink(destination: OnProcessViewFromVM(activityViewModel: viewModel, order: order)) { //
+                            NavigationLink(destination: OnProcessViewFromVM(activityViewModel: viewModel, order: order)) {
                                 ActivityCardViewWrapper(order: order)
                             }
-                            .buttonStyle(PlainButtonStyle()) //
+                            .buttonStyle(PlainButtonStyle())
                         }
                     }
                     .padding(.vertical)
                 }
             }
-        } else { // History
+        } else { // Riwayat
             if viewModel.historicalOrders.isEmpty {
-                Text("No order history found.").foregroundColor(.gray).padding()
+                activityEmptyView(
+                    icon: "doc.text.magnifyingglass",
+                    title: "Riwayat Kosong",
+                    message: "Anda belum pernah menyelesaikan pesanan apapun."
+                )
             } else {
                 ScrollView {
-                    VStack(spacing: 16) {
+                    LazyVStack(spacing: 15) {
                         ForEach(viewModel.historicalOrders) { order in
                              NavigationLink(destination: HistoryOrderViewFromVM(order: order)) {
                                 ActivityCardViewWrapper(order: order)
@@ -81,6 +101,26 @@ struct ActivityView: View { //
                     .padding(.vertical)
                 }
             }
+        }
+    }
+    
+    // View untuk tampilan saat halaman kosong
+    private func activityEmptyView(icon: String, title: String, message: String) -> some View {
+        VStack(spacing: 12) {
+            Spacer()
+            Image(systemName: icon)
+                .font(.system(size: 60))
+                .foregroundColor(.gray.opacity(0.5))
+            Text(title)
+                .font(.title3)
+                .fontWeight(.semibold)
+            Text(message)
+                .font(.subheadline)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+            Spacer()
+            Spacer()
         }
     }
 }

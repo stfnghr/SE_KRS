@@ -43,4 +43,3 @@ class UserSession: ObservableObject {
         return currentUserId != nil
     }
 }
-

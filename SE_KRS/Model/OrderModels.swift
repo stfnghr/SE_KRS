@@ -1,3 +1,5 @@
+// File: SE_KRS/Model/OrderModels.swift (REVISED)
+
 import Foundation
 
 enum OrderStatus: String, Codable, CaseIterable, Identifiable {
@@ -27,9 +29,14 @@ struct OrderModels: Identifiable, Codable, Hashable {
     var subtotal: Double {
         pricePerItem * Double(quantity)
     }
-    var id: String { itemId + "_\(pricePerItem)_\(UUID().uuidString)" }
+
+    // --- PERBAIKAN LOGIC ---
+    // ID sekarang stabil dan menggunakan itemId sebagai pengenal unik.
+    // Ini memastikan item yang sama dapat ditemukan dan diperbarui di dalam keranjang.
+    var id: String { itemId }
 }
 
+// PENYESUAIAN: Struct Order dilengkapi dengan properti yang hilang
 struct Order: Identifiable, Codable, Hashable {
     let id: String
     let userId: String
@@ -51,4 +58,3 @@ struct Order: Identifiable, Codable, Hashable {
         return subTotalItems + shippingFee - discount
     }
 }
-

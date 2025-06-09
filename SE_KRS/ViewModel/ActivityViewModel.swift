@@ -1,4 +1,4 @@
-// File: ViewModel/ActivityViewModel.swift
+// File: ViewModel/ActivityViewModel.swift (REVISED)
 import Foundation
 import Combine
 
@@ -23,7 +23,6 @@ class ActivityViewModel: ObservableObject {
 
     func fetchAllUserOrders() {
         guard let userId = userSession.currentUserId else {
-            // Jika logout, kosongkan daftar
             onProcessOrders = []
             historicalOrders = []
             return
@@ -33,19 +32,13 @@ class ActivityViewModel: ObservableObject {
         let allUserOrders = self.dataStore.orders.filter { $0.userId == userId }
                                         .sorted { $0.timestampCreated > $1.timestampCreated }
         
-        // --- PERBAIKAN LOGIKA FILTER DI SINI ---
-
-        // "On Process" sekarang HANYA untuk pesanan yang dibayar dan sedang disiapkan restoran.
         onProcessOrders = allUserOrders.filter {
-            [.paid, .processing].contains($0.status)
+            [.paid, .processing, .outForDelivery].contains($0.status)
         }
         
-        // "History" sekarang mencakup pesanan yang SEDANG DIANTAR, sudah tiba, atau gagal.
         historicalOrders = allUserOrders.filter {
-            [.outForDelivery, .delivered, .cancelled, .paymentFailed].contains($0.status)
+            [.delivered, .cancelled, .paymentFailed].contains($0.status)
         }
-        
-        // -----------------------------------------
         
         isLoading = false
     }
@@ -56,8 +49,14 @@ class ActivityViewModel: ObservableObject {
         if let orderIndex = dataStore.orders.firstIndex(where: { $0.id == orderId && $0.userId == userId }) {
             dataStore.orders[orderIndex].status = newStatus
             dataStore.orders[orderIndex].timestampUpdated = Date()
-            print("Order \(orderId) status updated to \(newStatus.rawValue) in DataStore.")
-            fetchAllUserOrders() // Panggil fetch lagi untuk memfilter ulang ke array yang benar
+            
+            // PENAMBAHAN: Logika untuk menampilkan notifikasi saat pesanan selesai
+            if newStatus == .delivered {
+                userSession.statusNotificationMessage = "Pesanan #\(orderId) telah selesai!"
+                userSession.showStatusNotification = true
+            }
+            
+            fetchAllUserOrders()
         }
     }
     
