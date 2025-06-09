@@ -1,4 +1,4 @@
-// File: View/SignUpView.swift
+// File: View/SignUpPage/SignUpPageView.swift (REVISED)
 import SwiftUI
 
 struct SignUpView: View {
@@ -8,90 +8,82 @@ struct SignUpView: View {
     @State private var email = ""
     @State private var password = ""
     
-    // HAPUS: State isSignupSuccessful tidak lagi diperlukan.
-    // @State private var isSignupSuccessful = false
-    
-    // State untuk alert tetap diperlukan
     @State private var showingAlert = false
     @State private var alertMessage = ""
-    
+
     var body: some View {
         ZStack {
-            // PERBAIKI: Cukup satu latar belakang
-            Color(red: 255/255, green: 241/255, blue: 230/255)
-                .edgesIgnoringSafeArea(.all)
+            Color(red: 245/255, green: 245/255, blue: 245/255).ignoresSafeArea()
             
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Spacer(minLength: 30)
+                VStack(spacing: 20) {
+                    Spacer(minLength: 50)
                     
-                    Text("Buat Akun Baru")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("DarkBrown"))
+                    Image(systemName: "person.crop.circle.fill.badge.plus")
+                        .font(.system(size: 60))
+                        .foregroundColor(.red)
                     
-                    Text("Isi data di bawah untuk memulai perjalanan kulinermu.")
-                        .font(.headline)
-                        .foregroundColor(.gray)
+                    VStack {
+                        Text("Buat Akun Baru")
+                            .font(.largeTitle).fontWeight(.bold)
+                        Text("Isi data untuk memulai perjalanan kulinermu.")
+                            .font(.subheadline).foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.bottom, 30)
                     
                     VStack(spacing: 15) {
                         TextField("Nama Lengkap", text: $name)
                             .modifier(FormTextFieldStyle())
+                            .textContentType(.name)
                         
                         TextField("Nomor Telepon", text: $phoneNumber)
                             .modifier(FormTextFieldStyle())
                             .keyboardType(.phonePad)
+                            .textContentType(.telephoneNumber)
                         
                         TextField("Email", text: $email)
                             .modifier(FormTextFieldStyle())
                             .keyboardType(.emailAddress)
                             .autocapitalization(.none)
+                            .textContentType(.emailAddress)
                         
                         SecureField("Password", text: $password)
                             .modifier(FormTextFieldStyle())
+                            .textContentType(.newPassword)
                     }
-                    .padding(.top, 30)
                     
                     Spacer()
                     
                     Button(action: handleSignUp) {
-                        Text("SIGN UP")
+                        Text("DAFTAR")
                             .modifier(PrimaryButtonStyle())
                     }
-                    .padding(.top, 40)
+                    .padding(.top, 20)
                     
-                    // HAPUS: NavigationLink tersembunyi ke MainView tidak diperlukan lagi.
-                    
-                    // PERBAIKI: Struktur HStack yang benar untuk link ke Login.
                     HStack {
                         Text("Sudah punya akun?")
+                        // Navigasi kembali ke LoginView
                         NavigationLink("Masuk di sini.", destination: LoginView())
                             .foregroundColor(.red)
                             .fontWeight(.bold)
                     }
                     .font(.footnote)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 10)
                     
+                    Spacer(minLength: 20)
                 }
                 .padding(30)
             }
         }
-        .navigationTitle("Daftar Akun")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarHidden(true)
         .alert(isPresented: $showingAlert) {
-            Alert(
-                title: Text("Sign Up Gagal"),
-                message: Text(alertMessage),
-                dismissButton: .default(Text("OK"))
-            )
+            Alert(title: Text("Daftar Gagal"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
     }
     
     func handleSignUp() {
-        // Validasi input tetap sama
-        guard !name.isEmpty, !phoneNumber.isEmpty, !email.isEmpty, !password.isEmpty else {
-            alertMessage = "Semua kolom wajib diisi untuk mendaftar."
+        guard !name.isEmpty, !email.isEmpty, !password.isEmpty else {
+            alertMessage = "Nama, email, dan password wajib diisi."
             showingAlert = true
             return
         }
@@ -100,56 +92,8 @@ struct SignUpView: View {
             showingAlert = true
             return
         }
-        
-        let newUser = UserModel(
-            name: name, phone: phoneNumber, email: email, password: password,
-            balance: 150000)
-        
-        // Cukup panggil fungsi ini.
-        // Perubahan state 'isLoggedIn' di UserSession akan secara otomatis
-        // memicu pergantian view di SE_KRSApp.
+
+        let newUser = UserModel(name: name, phone: phoneNumber, email: email, password: password, balance: 150000)
         userSession.loginUser(user: newUser, message: "Pendaftaran Berhasil!")
-        
-        // HAPUS: Baris ini tidak diperlukan lagi.
-        // isSignupSuccessful = true
-        
-        print("Sign Up Dummy Berhasil untuk: \(email)")
-    }
-}
-
-
-// MARK: - Helper ViewModifiers
-struct FormTextFieldStyle: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: 50)
-            .foregroundColor(.black)
-            .background(Color.white)
-            .cornerRadius(30)
-            .shadow(color: .gray.opacity(0.3), radius: 3, x: 2, y: 2)
-    }
-}
-
-struct PrimaryButtonStyle: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .fontWeight(.bold)
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.red)
-            .cornerRadius(25)
-            .shadow(color: .red.opacity(0.4), radius: 5, x: 0, y: 5)
-    }
-}
-
-// MARK: - Preview
-#Preview {
-    // Gunakan NavigationStack untuk preview agar link ke LoginView berfungsi
-    NavigationStack {
-        SignUpView()
-            .environmentObject(UserSession())
     }
 }

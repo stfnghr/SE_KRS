@@ -1,163 +1,149 @@
-// File: View/OnProcessViewFromVM.swift
-import MapKit
+// File: View/OnProcessViewFromVM.swift (REVISED)
 import SwiftUI
 
 struct OnProcessViewFromVM: View {
-    @ObservedObject var activityViewModel: ActivityViewModel  // Untuk update status
-    var order: Order  // Terima Order object
-
-    let location = CLLocationCoordinate2D(
-        latitude: -7.2865722,
-        longitude: 112.6320953
-    )
+    @Environment(\.dismiss) var dismiss
+    @ObservedObject var activityViewModel: ActivityViewModel
+    let order: Order
 
     var body: some View {
-        ZStack {
-            Map {
-                Marker("", coordinate: location)
+        ScrollView {
+            VStack(spacing: 16) {
+                headerView
+                driverInfoCard
+                locationInfoCard
+                orderDetailsCard
+                
+                // Tombol ini sekarang akan muncul sesuai permintaan
+                completeOrderButton
+                
+                Spacer()
             }
-            .mapControlVisibility(.hidden)
-            .edgesIgnoringSafeArea(.all)
-
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(spacing: 20) {
-                        Text("Order ID: \(order.id)")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .padding(.top, 30)
-
-                        Text("Status: \(order.status.rawValue)")
-                            .font(.headline)
-                            .foregroundColor(statusColor(order.status))
-                            .padding(.bottom)
-
-                        // Courier Info (Contoh Statis)
-                        Text("Your order is handled by,")  //
-                            .font(.system(size: 14))  //
-                        HStack {  //
-                            Image(systemName: "person.circle.fill").resizable()
-                                .frame(width: 50, height: 50).foregroundColor(
-                                    .gray
-                                ).padding(.trailing, 10)  //
-                            VStack(alignment: .leading) {  //
-                                Text(order.courierInfo ?? "Arif (Driver)")  // Gunakan data order jika ada
-                                    .font(.system(size: 18, weight: .semibold))  //
-                                Text("Honda Vario L1234BA")  // Data dummy
-                                    .font(.system(size: 14)).foregroundColor(
-                                        .orange)  //
-                            }
-                            Spacer()  //
-                            HStack {
-                                Image(systemName: "ellipsis.message")
-                                Image(systemName: "phone")
-                            }.foregroundColor(.red)  //
-                        }.padding(.horizontal, 30)  //
-
-                        // Delivery Details
-                        Group {
-                            detailRow(
-                                title: "Pick Up Order at:",
-                                value: order.restaurantName ?? "Nama Restoran")  //
-                            detailRow(
-                                title: "Delivered to:",
-                                value: order.deliveryAddress ?? "Alamat Anda")  //
-                        }.padding(.horizontal, 30)
-
-                        Divider().background(.black).padding(.vertical)  //
-
-                        // Order Items
-                        VStack(alignment: .leading) {  //
-                            Text("Order Details").font(.system(size: 14))
-                                .foregroundColor(.orange)  //
-                            ForEach(order.items) { item in
-                                HStack {  //
-                                    Text("\(item.itemName)").font(
-                                        .system(size: 18))  //
-                                    Spacer()  //
-                                    Text("x\(item.quantity)").font(
-                                        .system(size: 18))  //
-                                }
-                                .padding(.vertical, 1)
-                            }
-                            HStack {
-                                Text("Total Amount:").font(
-                                    .system(size: 18, weight: .semibold))
-                                Spacer()
-                                Text(
-                                    "Rp\(String(format: "%.0f", order.totalAmount))"
-                                ).font(.system(size: 18, weight: .semibold))
-                            }
-                            .padding(.top, 5)
-                        }
-                        .padding(.horizontal, 30)  //
-                        .padding(.bottom, 20)
-
-                        // Tombol untuk simulasi update status
-                        actionButtons()
-
-                        Spacer()
-                    }
-                    .padding(.top, 20)  // Padding di dalam ScrollView
-                    .background(
-                        Rectangle()
-                            .fill(.white)
-                            .cornerRadius(30)
-                            .shadow(radius: 2, x: 0, y: -2)
-                    )
-                }
-                .frame(height: UIScreen.main.bounds.height * 0.6)
-            }
+            .padding()
         }
-        .navigationTitle("Tracking Order")  // Judul lebih generik
+        .background(Color.lightBackground.ignoresSafeArea())
+        .navigationBarBackButtonHidden(true)
         .navigationBarTitleDisplayMode(.inline)
-        .tint(.black)  //
-    }
-
-    @ViewBuilder
-    func detailRow(title: String, value: String) -> some View {
-        HStack {  //
-            VStack(alignment: .leading) {  //
-                Text(title).font(.system(size: 14)).foregroundColor(.orange)  //
-                Text(value).font(.system(size: 18))  //
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Lacak Pesanan")
+                    .font(.headline)
+                    .fontWeight(.semibold)
             }
-            .padding(.top, 10)  //
-            Spacer()  //
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(Color.secondaryText.opacity(0.5))
+                }
+            }
         }
     }
 
-    @ViewBuilder
-    func actionButtons() -> some View {
+    // MARK: - Subviews
+
+    private var headerView: some View {
         VStack {
-            if order.status == .paid {
-                Button("Simulate: Order Diproses Restoran") {
-                    activityViewModel.updateOrderStatus(
-                        orderId: order.id, newStatus: .processing)
-                }
-                .buttonStyle(.borderedProminent).tint(.orange)
-            } else if order.status == .processing {
-                Button("Simulate: Sedang Diantar Kurir") {
-                    activityViewModel.updateOrderStatus(
-                        orderId: order.id, newStatus: .outForDelivery)
-                }
-                .buttonStyle(.borderedProminent).tint(.blue)
-            } else if order.status == .outForDelivery {
-                Button("Simulate: Pesanan Tiba (Delivered)") {
-                    activityViewModel.updateOrderStatus(
-                        orderId: order.id, newStatus: .delivered)
-                }
-                .buttonStyle(.borderedProminent).tint(.green)
-            }
+            Text("Status: \(order.status.rawValue)")
+                .font(.headline).fontWeight(.bold).foregroundColor(.white)
+                .padding(.horizontal, 16).padding(.vertical, 8)
+                .background(statusColor(order.status)).cornerRadius(20)
+            Text("Order ID: \(order.id)")
+                .font(.footnote).foregroundColor(.secondaryText).padding(.top, 4)
         }
-        .padding()
+    }
+    
+    private var driverInfoCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Informasi Kurir").font(.headline).fontWeight(.semibold)
+            HStack(spacing: 12) {
+                Image(systemName: "person.crop.circle.fill").font(.system(size: 44)).foregroundColor(.secondaryText)
+                VStack(alignment: .leading) {
+                    Text(order.courierInfo ?? "Arif (Driver)").fontWeight(.medium)
+                    Text("Honda Vario L1234BA").font(.caption).foregroundColor(.secondaryText)
+                }
+                Spacer()
+                HStack(spacing: 16) {
+                    Image(systemName: "message.fill")
+                    Image(systemName: "phone.fill")
+                }.foregroundColor(Color.red).font(.title3)
+            }
+        }.asCard()
     }
 
-    func statusColor(_ status: OrderStatus) -> Color {
+    private var locationInfoCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Detail Pengiriman").font(.headline).fontWeight(.semibold)
+            Divider()
+            InfoRow(icon: "house.fill", label: "Diambil dari:", value: order.restaurantName ?? "Nama Restoran")
+            InfoRow(icon: "mappin.and.ellipse", label: "Dikirim ke:", value: order.deliveryAddress ?? "Alamat Anda")
+        }.asCard()
+    }
+    
+    private var orderDetailsCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Rincian Pesanan").font(.headline).fontWeight(.semibold)
+            Divider()
+            ForEach(order.items) { item in
+                HStack {
+                    Text("\(item.quantity)x").foregroundColor(.secondaryText)
+                    Text(item.itemName)
+                    Spacer()
+                    Text("Rp\(String(format: "%.0f", item.subtotal))")
+                }.font(.subheadline)
+            }
+            Divider()
+            HStack {
+                Text("Total Pesanan").fontWeight(.bold)
+                Spacer()
+                Text("Rp\(String(format: "%.0f", order.totalAmount))").fontWeight(.bold).foregroundColor(.red)
+            }.font(.headline)
+        }.asCard()
+    }
+
+    @ViewBuilder
+    private var completeOrderButton: some View {
+        // --- PERBAIKAN LOGIC TAMPILAN TOMBOL ---
+        // Tombol sekarang akan tampil jika status pesanan "Processing" ATAU "Out for Delivery"
+        if [.processing, .outForDelivery].contains(order.status) {
+            Button(action: {
+                activityViewModel.updateOrderStatus(orderId: order.id, newStatus: .delivered)
+                dismiss()
+            }) {
+                Text("Selesaikan Pesanan")
+                    .font(.headline).fontWeight(.bold).foregroundColor(.white)
+                    .frame(maxWidth: .infinity).padding()
+                    .background(Color.green).cornerRadius(15) // Tombol berwarna hijau
+                    .shadow(color: .green.opacity(0.3), radius: 5, y: 3)
+            }
+            .padding(.top, 10)
+        }
+    }
+
+    private func statusColor(_ status: OrderStatus) -> Color {
         switch status {
-        case .paid: return .blue
-        case .processing: return .purple
-        case .outForDelivery: return .teal
+        case .processing, .paid: return .blue
+        case .outForDelivery: return .orange
+        case .delivered: return .green
         default: return .gray
+        }
+    }
+}
+
+private struct InfoRow: View {
+    let icon: String
+    let label: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(label).font(.caption).foregroundColor(.secondaryText)
+            HStack {
+                Image(systemName: icon).foregroundColor(.red)
+                Text(value).fontWeight(.medium)
+            }.font(.subheadline)
         }
     }
 }

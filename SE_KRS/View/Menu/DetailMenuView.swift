@@ -1,4 +1,4 @@
-// File: View/DetailMenuView.swift (FINAL REVISION TO MATCH LATEST SCREENSHOT)
+// File: View/DetailMenuView.swift (REVISED)
 import SwiftUI
 
 struct DetailMenuView: View {
@@ -186,6 +186,8 @@ extension DetailMenuView {
                 .padding(.vertical, 14)
                 .padding(.horizontal, 16)
                 .frame(minWidth: 110)
+                // --- PERBAIKAN DI SINI ---
+                // Warna background untuk item yang habis diubah dari .red menjadi .gray
                 .background(menuItem.isAvailable ? actionButtonColor : Color.gray)
                 .cornerRadius(12)
             }
@@ -195,21 +197,5 @@ extension DetailMenuView {
         .padding(.top, 16)
         .padding(.bottom, 34)
         .background(.white)
-    }
-}
-
-#Preview("DetailMenuView Referensi Baru") {
-    let previewMenuItem = MenuModel(
-        name: "Nasi Goreng Spesial Dengan Bumbu Rahasia Super Panjang Sekali",
-        price: 25000,
-        description: "Dengan telur, sosis, dan ayam suwir. Deskripsi ini dibuat cukup panjang untuk menguji bagaimana teks akan wrap dan apakah ada bagian yang terpotong atau tidak dalam tampilan UI yang sudah diperbaiki.",
-        category: "NASI",
-        image: "nasi-goreng",
-        stock: 5
-    )
-    
-    return NavigationView {
-        DetailMenuView(menuItem: previewMenuItem)
-            .environmentObject(CartViewModel(userSession: UserSession()))
     }
 }
