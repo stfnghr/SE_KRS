@@ -17,8 +17,6 @@ struct AllFoodsView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 15) {
                 ForEach(popularMenus) { menu_item in
-                    // --- REVISI PEMANGGILAN ---
-                    // Panggil init yang benar dan hapus .redCard
                     FoodCardView(menuItem: menu_item, restaurant: dummyRestaurant)
                 }
             }
@@ -31,7 +29,6 @@ struct AllFoodsView: View {
 }
 
 #Preview {
-    // Contoh data untuk preview
     let popularMenus: [MenuModel] = [
         MenuModel(name: "Nasi Goreng Populer", price: 23000, description: "Populer dan enak", category: "Nasi", image: "nasi-goreng", stock: 5),
         MenuModel(name: "Ayam Geprek Viral", price: 20000, description: "Pedasnya nampol", category: "Ayam", image: "foods", stock: 0),
