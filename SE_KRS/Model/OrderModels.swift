@@ -30,13 +30,11 @@ struct OrderModels: Identifiable, Codable, Hashable {
         pricePerItem * Double(quantity)
     }
 
-    // --- PERBAIKAN LOGIC ---
-    // ID sekarang stabil dan menggunakan itemId sebagai pengenal unik.
-    // Ini memastikan item yang sama dapat ditemukan dan diperbarui di dalam keranjang.
+
     var id: String { itemId }
 }
 
-// PENYESUAIAN: Struct Order dilengkapi dengan properti yang hilang
+
 struct Order: Identifiable, Codable, Hashable {
     let id: String
     let userId: String
