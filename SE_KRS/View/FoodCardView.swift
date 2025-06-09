@@ -5,7 +5,6 @@ import SwiftUI
 
 // --- View Utama ---
 struct FoodCardView: View {
-    // Properti ini akan menentukan data apa yang akan ditampilkan
     let restaurant: RestaurantModel?
     let menuItem: MenuModel?
     
@@ -22,14 +21,13 @@ struct FoodCardView: View {
 
     // Inisialisasi untuk kartu Menu Item (Populer)
     init(menuItem: MenuModel, restaurant: RestaurantModel) {
-        self.restaurant = restaurant // Tetap dibutuhkan untuk navigasi
+        self.restaurant = restaurant 
         self.menuItem = menuItem
     }
     
     var body: some View {
         Group {
             if let restaurant = restaurant, menuItem == nil {
-                // --- Tampilan untuk Kartu Restoran (White Card) ---
                 NavigationLink(destination: MenuView(restaurant: restaurant)) {
                     RestaurantCard(restaurant: restaurant)
                 }
@@ -42,7 +40,6 @@ struct FoodCardView: View {
                     }
                 }
             } else if let menuItem = menuItem, let restaurant = restaurant {
-                // --- Tampilan untuk Kartu Makanan Populer (Red Card) ---
                  NavigationLink(destination: DetailMenuView(menuItem: menuItem)) {
                     PopularMenuItemCard(menuItem: menuItem)
                 }
@@ -63,13 +60,12 @@ struct FoodCardView: View {
 }
 
 
-// MARK: - Subview untuk Kartu Restoran
+
 struct RestaurantCard: View {
     let restaurant: RestaurantModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // --- REVISI: Gambar dengan Overlay Status ---
             ZStack {
                 Image(restaurant.image.isEmpty ? "foods" : restaurant.image)
                     .resizable()
@@ -91,10 +87,10 @@ struct RestaurantCard: View {
             }
             .cornerRadius(15, corners: [.topLeft, .topRight])
             
-            // --- REVISI: Konten Teks yang Lebih Rapi ---
+       
             VStack(alignment: .leading, spacing: 4) {
                 Text(restaurant.name)
-                    .font(.system(size: 15, weight: .bold)) // Ukuran konsisten
+                    .font(.system(size: 15, weight: .bold))
                     .foregroundColor(.primary)
                     .lineLimit(1)
                 
@@ -102,10 +98,10 @@ struct RestaurantCard: View {
                     Image(systemName: "star.fill")
                         .foregroundColor(.orange)
                     Text(String(format: "%.1f", restaurant.rating))
-                    Text("• est. 20 min") // Contoh info tambahan
+                    Text("• est. 20 min")
                 }
-                .font(.caption) // Ukuran konsisten
-                .foregroundColor(.secondary) // Warna abu-abu untuk info sekunder
+                .font(.caption)
+                .foregroundColor(.secondary) 
             }
             .padding(10)
             .frame(width: 175, alignment: .leading)
@@ -124,12 +120,12 @@ struct PopularMenuItemCard: View {
     let menuItem: MenuModel
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) { // Align semua konten ke bawah kiri
+        ZStack(alignment: .bottomLeading) { 
             // 1. Gambar sebagai background
             Image(menuItem.image.isEmpty ? "foods" : menuItem.image)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
-                .frame(width: 150, height: 200) // Ukuran kartu dibuat lebih besar
+                .frame(width: 150, height: 200)
 
             // 2. Gradien gelap untuk keterbacaan teks
             LinearGradient(
@@ -153,10 +149,9 @@ struct PopularMenuItemCard: View {
 
             // 4. Overlay jika stok habis
             if !menuItem.isAvailable {
-                // Overlay gelap di seluruh kartu
                 Color.black.opacity(0.5)
                 
-                // Teks status di tengah
+
                 Text("STOK HABIS")
                     .font(.caption.bold())
                     .foregroundColor(.white)
@@ -176,7 +171,7 @@ struct PopularMenuItemCard: View {
 
 // MARK: - Preview
 #Preview("FoodCardView") {
-    // Data dummy untuk semua state
+
     let availableMenu = MenuModel(name: "Nasi Goreng Spesial", price: 20000, description: "Enak", category: "Nasi", image: "nasi-goreng", stock: 10)
     let outOfStockMenu = MenuModel(name: "Mie Goreng Super Duper Panjang Habis", price: 18000, description: "Lagi kosong", category: "Mie", image: "foods", stock: 0)
     
