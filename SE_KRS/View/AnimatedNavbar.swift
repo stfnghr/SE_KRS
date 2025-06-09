@@ -12,26 +12,18 @@ struct AnimatedNavbar: View {
         let itemAppearance = UITabBarItemAppearance()
         
         // Warna untuk status NORMAL (tidak aktif)
-        itemAppearance.normal.iconColor = UIColor.white.withAlphaComponent(0.75) // Ikon putih sedikit lebih jelas
+        itemAppearance.normal.iconColor = UIColor.white.withAlphaComponent(0.75)
         itemAppearance.normal.titleTextAttributes = [
             NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.75),
-            // --- MUNGKIN COBA TAMBAHKAN FONT SIZE UNTUK TEKS ---
-            // NSAttributedString.Key.font: UIFont.systemFont(ofSize: 10) // Sesuaikan ukuran jika perlu
+      
         ]
 
-        // Warna untuk status SELECTED (aktif)
         itemAppearance.selected.iconColor = UIColor.white
         itemAppearance.selected.titleTextAttributes = [
             NSAttributedString.Key.foregroundColor: UIColor.white,
-            // NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 10) // Sesuaikan ukuran jika perlu
-        ]
-        
-        // --- MENCORBA MENYESUAIKAN POSISI TEKS (MUNGKIN BERDAMPAK KE RUANG IKON) ---
-        // itemAppearance.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 2) // Geser teks sedikit ke bawah
-        
         appearance.stackedLayoutAppearance = itemAppearance
-        appearance.inlineLayoutAppearance = itemAppearance // Jarang digunakan tapi baik untuk konsistensi
-        appearance.compactInlineLayoutAppearance = itemAppearance // Jarang digunakan tapi baik untuk konsistensi
+        appearance.inlineLayoutAppearance = itemAppearance 
+        appearance.compactInlineLayoutAppearance = itemAppearance 
         
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
@@ -42,12 +34,9 @@ struct AnimatedNavbar: View {
             HomeView()
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
-                    // --- COBA GUNAKAN FONT UNTUK IKON ---
-                    // Menggunakan .font() di sini mungkin tidak banyak efek pada ikon sistem,
-                    // tapi bisa dicoba. Ukuran ikon sistem lebih diatur oleh `pointSize` gambar itu sendiri.
+               
                 }
-                // .font(.system(size: 20)) // Menerapkan font ke seluruh tab item, bisa dicoba
-
+              
             CartView()
                 .tabItem {
                     Label("Keranjang", systemImage: "cart.fill")
